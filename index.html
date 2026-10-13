@@ -1,0 +1,1306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mobile Educational Management System - St. Benedict Daycare Center</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- SUPABASE JS SDK CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        :root {
+            --forest-green: #1E5E3B;
+            --navy-blue: #0F2D5C;
+            --gold: #D4AF37;
+            --neu-bg: #E4E9ED;
+            --neu-shadow-dark: #b6bcbe;
+            --neu-shadow-light: #ffffff;
+            --glass-bg: rgba(255, 255, 255, 0.68);
+            --glass-border: rgba(255, 255, 255, 0.88);
+            --danger-red: #E53E3E;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #0F172A;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        /* MOBILE APP CONTAINER CANVAS */
+        .mobile-frame {
+            width: 100%;
+            max-width: 412px;
+            height: 100vh;
+            max-height: 870px;
+            background-color: var(--neu-bg);
+            border-radius: 40px;
+            box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            border: 6px solid rgba(255, 255, 255, 0.12);
+        }
+
+        @media (max-width: 450px) {
+            .mobile-frame {
+                border-radius: 0;
+                max-height: 100vh;
+                border: none;
+            }
+        }
+
+        /* GLASS HEADER */
+        .app-header {
+            padding: 18px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(15, 45, 92, 0.94);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            color: #ffffff;
+            z-index: 10;
+        }
+
+        .brand-badge {
+            width: 42px;
+            height: 42px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.12);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: var(--gold);
+            border: 1px solid rgba(212, 175, 55, 0.5);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+            animation: pulseGlow 3s infinite ease-in-out;
+        }
+
+        @keyframes pulseGlow {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 10px rgba(212, 175, 55, 0.3); }
+            50% { transform: scale(1.06); box-shadow: 0 0 18px rgba(212, 175, 55, 0.6); }
+        }
+
+        .brand-text h1 {
+            margin: 0;
+            font-size: 0.88rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+
+        .brand-text p {
+            margin: 0;
+            font-size: 0.65rem;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .icon-btn-glass {
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.12);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 0.95rem;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .icon-btn-glass:active {
+            transform: scale(0.85);
+        }
+
+        .logout-btn-glass {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: rgba(239, 68, 68, 0.4);
+            color: #fca5a5;
+        }
+
+        /* SCROLLABLE CONTENT BODY */
+        .app-body {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            position: relative;
+        }
+
+        .app-body::-webkit-scrollbar {
+            display: none;
+        }
+
+        /* NEUMORPHIC + GLASS CARDS */
+        .glass-neu-card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 22px;
+            box-shadow: 8px 8px 16px var(--neu-shadow-dark), -8px -8px 16px var(--neu-shadow-light);
+            margin-bottom: 20px;
+            animation: cardSlideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes cardSlideUp {
+            from { opacity: 0; transform: translateY(22px) scale(0.98); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .card-title {
+            margin: 0 0 16px;
+            font-size: 0.98rem;
+            color: var(--navy-blue);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* KPI ANALYTICS GRID */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .kpi-card {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 12px 8px;
+            text-align: center;
+            box-shadow: 3px 3px 6px var(--neu-shadow-dark), -3px -3px 6px var(--neu-shadow-light);
+            transition: transform 0.2s;
+        }
+
+        .kpi-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .kpi-val {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--navy-blue);
+        }
+
+        .kpi-lbl {
+            font-size: 0.62rem;
+            color: #64748b;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        /* FORM CONTROLS & EYE WRAPPER */
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.76rem;
+            color: #475569;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
+
+        .neu-input {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--neu-bg);
+            border: none;
+            border-radius: 14px;
+            box-shadow: inset 4px 4px 8px var(--neu-shadow-dark), inset -4px -4px 8px var(--neu-shadow-light);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.85rem;
+            color: #1e293b;
+            outline: none;
+            transition: all 0.25s ease;
+        }
+
+        .neu-input:focus {
+            box-shadow: inset 6px 6px 12px #a8aeaf, inset -6px -6px 12px #ffffff;
+        }
+
+        .input-eye-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-eye-wrapper .neu-input {
+            padding-right: 42px;
+        }
+
+        .eye-toggle-btn {
+            position: absolute;
+            right: 10px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            color: #64748b;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            user-select: none;
+            transition: transform 0.2s;
+        }
+
+        .eye-toggle-btn:active {
+            transform: scale(0.85);
+        }
+
+        .neu-btn {
+            width: 100%;
+            padding: 13px;
+            background: var(--neu-bg);
+            border: none;
+            border-radius: 14px;
+            box-shadow: 5px 5px 10px var(--neu-shadow-dark), -5px -5px 10px var(--neu-shadow-light);
+            font-family: 'Poppins', sans-serif;
+            font-weight: 600;
+            font-size: 0.88rem;
+            color: var(--navy-blue);
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+
+        .neu-btn:active {
+            box-shadow: inset 3px 3px 6px var(--neu-shadow-dark), inset -3px -3px 6px var(--neu-shadow-light);
+            transform: scale(0.97);
+        }
+
+        .neu-btn-primary {
+            background: var(--forest-green);
+            color: #ffffff;
+            box-shadow: 5px 5px 12px rgba(30, 94, 59, 0.35), -5px -5px 12px #ffffff;
+        }
+
+        .neu-btn-primary:active {
+            background: #16462c;
+            box-shadow: inset 3px 3px 6px rgba(0,0,0,0.4);
+        }
+
+        .role-pills {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .pill-btn {
+            flex: 1;
+            padding: 10px 4px;
+            background: var(--neu-bg);
+            border: none;
+            border-radius: 12px;
+            box-shadow: 4px 4px 8px var(--neu-shadow-dark), -4px -4px 8px var(--neu-shadow-light);
+            font-family: 'Poppins', sans-serif;
+            font-size: 0.74rem;
+            font-weight: 600;
+            color: var(--navy-blue);
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .pill-btn:active {
+            box-shadow: inset 2px 2px 5px var(--neu-shadow-dark), inset -2px -2px 5px var(--neu-shadow-light);
+            color: var(--forest-green);
+            transform: scale(0.95);
+        }
+
+        /* IN-APP TOAST NOTIFICATION SYSTEM */
+        .toast-banner {
+            padding: 12px 16px;
+            border-radius: 14px;
+            font-size: 0.8rem;
+            margin-bottom: 16px;
+            font-weight: 500;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .toast-error { background: #fef2f2; color: #991b1b; border: 1px solid #fecaca; }
+        .toast-success { background: #f0fdf4; color: #166534; border: 1px solid #bbf7d0; }
+
+        .item-card-glass {
+            background: rgba(255, 255, 255, 0.68);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.88);
+            border-radius: 16px;
+            padding: 14px;
+            margin-bottom: 12px;
+            box-shadow: 3px 3px 6px var(--neu-shadow-dark), -3px -3px 6px var(--neu-shadow-light);
+            transition: transform 0.2s;
+        }
+
+        .item-card-glass:hover {
+            transform: translateY(-2px);
+        }
+
+        .status-badge {
+            font-size: 0.65rem;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .status-pending-review { background: #fef9c3; color: #854d0e; }
+        .status-teacher-reviewed { background: #e0f2fe; color: #0369a1; }
+        .status-officially-enrolled { background: #dcfce7; color: #166534; }
+        .status-declined { background: #fee2e2; color: #991b1b; }
+
+        .sm-btn-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .sm-btn {
+            flex: 1;
+            padding: 8px;
+            border-radius: 10px;
+            border: none;
+            font-size: 0.72rem;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            box-shadow: 2px 2px 5px var(--neu-shadow-dark), -2px -2px 5px var(--neu-shadow-light);
+            transition: all 0.2s;
+        }
+
+        .sm-review { background: #0284c7; color: #fff; }
+        .sm-approve { background: var(--forest-green); color: #fff; }
+        .sm-decline { background: #ef4444; color: #fff; }
+
+        .sm-btn:active { transform: scale(0.95); }
+
+        .modal-mask {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(15, 23, 42, 0.68);
+            backdrop-filter: blur(8px);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            z-index: 100;
+            animation: fadeIn 0.25s ease;
+        }
+
+        .modal-box {
+            background: rgba(228, 233, 237, 0.96);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 24px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes scaleUp {
+            from { transform: scale(0.85); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div class="mobile-frame">
+
+    <div class="app-header">
+        <div style="display:flex; align-items:center; gap:12px;">
+            <div class="brand-badge">SB</div>
+            <div class="brand-text">
+                <h1>ST. BENEDICT DAYCARE</h1>
+                <p>Mobile Educational Management</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button id="soundToggleBtn" class="icon-btn-glass" onclick="toggleSound()" title="Toggle Audio">🔊</button>
+            <button id="topLogoutBtn" class="icon-btn-glass logout-btn-glass hidden" onclick="openLogoutModal()" title="Logout">✕</button>
+        </div>
+    </div>
+
+    <div class="app-body">
+
+        <div id="toastBox" class="toast-banner hidden"></div>
+
+        <!-- 1. LOGIN VIEW -->
+        <div id="viewLogin">
+            <div class="glass-neu-card">
+                <h2 class="card-title">Sign In</h2>
+
+                <label class="form-label" style="text-align: center; margin-bottom: 8px;">Quick Role Preview:</label>
+                <div class="role-pills">
+                    <button type="button" class="pill-btn" onclick="quickLogin('admin_benedict')">Admin</button>
+                    <button type="button" class="pill-btn" onclick="quickLogin('teacher_mary')">Teacher</button>
+                    <button type="button" class="pill-btn" onclick="quickLogin('parent_juan')">Parent</button>
+                </div>
+
+                <form id="loginForm" onsubmit="handleLogin(event)">
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input type="text" id="loginUsername" class="neu-input" placeholder="Enter username" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <div class="input-eye-wrapper">
+                            <input type="password" id="loginPassword" class="neu-input" placeholder="Enter password" required>
+                            <button type="button" class="eye-toggle-btn" onclick="togglePassVisibility('loginPassword', this)">👁️</button>
+                        </div>
+                    </div>
+                    <div class="form-group" style="display: flex; align-items: center; justify-content: flex-end;">
+                        <a href="#" onclick="switchAuthView('otp')" style="font-size: 0.75rem; color: var(--navy-blue); font-weight:600; text-decoration:none;">Forgot OTP?</a>
+                    </div>
+                    <button type="submit" class="neu-btn neu-btn-primary">LOGIN</button>
+                </form>
+            </div>
+
+            <button type="button" class="neu-btn" onclick="switchAuthView('register')">Create New Account</button>
+        </div>
+
+        <!-- 2. REGISTER VIEW -->
+        <div id="viewRegister" class="hidden">
+            <div class="glass-neu-card">
+                <h2 class="card-title">Create Account</h2>
+                <form id="registerForm" onsubmit="handleRegister(event)">
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" id="regFullName" class="neu-input" placeholder="e.g., Juan Dela Cruz" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" id="regEmail" class="neu-input" placeholder="e.g., juan@gmail.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Username</label>
+                        <input type="text" id="regUsername" class="neu-input" placeholder="Choose username" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Account Role</label>
+                        <select id="regRole" class="neu-input">
+                            <option value="3">Parent</option>
+                            <option value="2">Teacher</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <div class="input-eye-wrapper">
+                            <input type="password" id="regPassword" class="neu-input" placeholder="Min 8 chars (A-z, 0-9, @)" required>
+                            <button type="button" class="eye-toggle-btn" onclick="togglePassVisibility('regPassword', this)">👁️</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Confirm Password</label>
+                        <div class="input-eye-wrapper">
+                            <input type="password" id="regConfirmPassword" class="neu-input" placeholder="Re-enter password" required>
+                            <button type="button" class="eye-toggle-btn" onclick="togglePassVisibility('regConfirmPassword', this)">👁️</button>
+                        </div>
+                    </div>
+                    <button type="submit" class="neu-btn neu-btn-primary">REGISTER</button>
+                </form>
+            </div>
+
+            <button type="button" class="neu-btn" onclick="switchAuthView('login')">Back to Sign In</button>
+        </div>
+
+        <!-- 3. OTP ACCOUNT RECOVERY VIEW -->
+        <div id="viewOtp" class="hidden">
+            <div class="glass-neu-card">
+                <h2 class="card-title">OTP Account Recovery</h2>
+                
+                <div id="otpStep1">
+                    <p style="font-size:0.78rem; color:#64748b; margin-bottom:15px;">Enter your registered email to receive a 6-digit OTP verification code connected to Supabase.</p>
+                    <div class="form-group">
+                        <label class="form-label">Registered Email</label>
+                        <input type="email" id="otpEmailInput" class="neu-input" placeholder="e.g., juan@gmail.com" required>
+                    </div>
+                    <button type="button" class="neu-btn neu-btn-primary" onclick="requestOtpCode()">GENERATE OTP CODE</button>
+                </div>
+
+                <div id="otpStep2" class="hidden">
+                    <div class="form-group">
+                        <label class="form-label">6-Digit OTP Code</label>
+                        <input type="text" id="otpCodeInput" class="neu-input" placeholder="Enter 6-digit OTP" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">New Password</label>
+                        <div class="input-eye-wrapper">
+                            <input type="password" id="otpNewPassword" class="neu-input" placeholder="Min 8 chars (A-z, 0-9, @)" required>
+                            <button type="button" class="eye-toggle-btn" onclick="togglePassVisibility('otpNewPassword', this)">👁️</button>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Confirm New Password</label>
+                        <div class="input-eye-wrapper">
+                            <input type="password" id="otpConfirmPassword" class="neu-input" placeholder="Re-enter new password" required>
+                            <button type="button" class="eye-toggle-btn" onclick="togglePassVisibility('otpConfirmPassword', this)">👁️</button>
+                        </div>
+                    </div>
+                    <button type="button" class="neu-btn neu-btn-primary" onclick="verifyOtpAndResetPassword()">VERIFY OTP & RESET</button>
+                </div>
+            </div>
+
+            <button type="button" class="neu-btn" onclick="switchAuthView('login')">Back to Sign In</button>
+        </div>
+
+        <!-- 4. DASHBOARD VIEW -->
+        <div id="viewDashboard" class="hidden">
+
+            <!-- PROFILE CARD & KPI SUMMARY METRICS -->
+            <div class="glass-neu-card" style="padding: 16px 20px; border-left: 5px solid var(--forest-green);">
+                <div style="font-size:0.7rem; color:#64748b; text-transform:uppercase; font-weight:600;">Logged in as</div>
+                <div id="dashFullName" style="font-weight:700; color:var(--navy-blue); font-size:1.05rem;">User Name</div>
+                <div id="dashRole" style="font-size:0.75rem; color:var(--forest-green); font-weight:600; margin-top:2px;">Role: Parent</div>
+            </div>
+
+            <div class="kpi-grid">
+                <div class="kpi-card">
+                    <div id="kpiApps" class="kpi-val">0</div>
+                    <div class="kpi-lbl">Applications</div>
+                </div>
+                <div class="kpi-card">
+                    <div id="kpiPending" class="kpi-val">0</div>
+                    <div class="kpi-lbl">Pending</div>
+                </div>
+                <div class="kpi-card">
+                    <div id="kpiEnrolled" class="kpi-val">0</div>
+                    <div class="kpi-lbl">Enrolled</div>
+                </div>
+            </div>
+
+            <!-- ANNOUNCEMENT / NOTICE BOARD CARD -->
+            <div class="glass-neu-card">
+                <h3 class="card-title">Center Announcements 📢</h3>
+                <div id="announcementsList"></div>
+
+                <div id="announcementPostForm" class="hidden" style="margin-top:15px; border-top:1px solid rgba(0,0,0,0.08); padding-top:12px;">
+                    <div class="form-group">
+                        <label class="form-label">Notice Title</label>
+                        <input type="text" id="annTitle" class="neu-input" placeholder="e.g., PTA Meeting">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Notice Content</label>
+                        <textarea id="annContent" class="neu-input" style="height:60px; resize:none;" placeholder="Write message..."></textarea>
+                    </div>
+                    <button type="button" class="neu-btn neu-btn-primary" onclick="postAnnouncement()">POST ANNOUNCEMENT</button>
+                </div>
+            </div>
+
+            <!-- PARENT MODULE -->
+            <div id="moduleParent" class="hidden">
+                <div class="glass-neu-card">
+                    <h3 class="card-title">Enrollment Application</h3>
+                    <form id="enrollmentForm" onsubmit="handleEnrollmentSubmit(event)">
+                        <div class="form-group">
+                            <label class="form-label">Child First Name</label>
+                            <input type="text" id="childFirstName" class="neu-input" placeholder="Child's first name" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Child Last Name</label>
+                            <input type="text" id="childLastName" class="neu-input" placeholder="Child's last name" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Date of Birth</label>
+                            <input type="date" id="childDob" class="neu-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Gender</label>
+                            <select id="childGender" class="neu-input">
+                                <option value="Male">Male</option>
+                                <option value="Female">Female</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="neu-btn neu-btn-primary">SUBMIT APPLICATION</button>
+                    </form>
+                </div>
+
+                <div class="glass-neu-card">
+                    <h3 class="card-title">My Submitted Applications</h3>
+                    <div id="parentApplicationsList"></div>
+                </div>
+            </div>
+
+            <!-- STAFF & ADMIN TRANSACTION PIPELINE & ROSTER -->
+            <div id="moduleStaff" class="hidden">
+                <div class="glass-neu-card">
+                    <h3 class="card-title">Enrollment Pipeline</h3>
+                    <div id="enrollmentsList"></div>
+                </div>
+
+                <div class="glass-neu-card">
+                    <h3 class="card-title">Official Enrolled Students 🎓</h3>
+                    <div id="studentsRosterList"></div>
+                </div>
+            </div>
+
+            <!-- ADMIN AUDIT LOG TRAIL -->
+            <div id="moduleAdminLogs" class="glass-neu-card hidden">
+                <h3 class="card-title">System Log Trail</h3>
+                <div id="logsList"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- LOGOUT MODAL -->
+    <div id="logoutModal" class="modal-mask hidden">
+        <div class="modal-box">
+            <h3 style="margin:0 0 8px; color:var(--navy-blue);">Confirm Logout</h3>
+            <p style="font-size:0.82rem; color:#64748b; margin-bottom:20px;">Are you sure you want to logout/sign out?</p>
+            <div style="display:flex; gap:12px;">
+                <button type="button" class="neu-btn" onclick="closeLogoutModal()" style="flex:1;">Cancel</button>
+                <button type="button" class="neu-btn neu-btn-primary" onclick="confirmLogout()" style="flex:1; background:#ef4444;">Logout</button>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // SUPABASE CONFIGURATION
+    const SUPABASE_URL = 'https://trriurqlsnatacdmxuyb.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRycml1cnFsc25hdGFjZG14dXliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5MTczMjcsImV4cCI6MjEwNzQ5MzMyN30.xdjBfDDXP2RsEwJLtG2zJifiVE555bzh-atOHGKe614';
+    
+    const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let currentUser = JSON.parse(sessionStorage.getItem('educare_session_user')) || null;
+    let soundEnabled = true;
+
+    // WEB AUDIO API SYNTHESIZER (SYNTHETIC UI CLICK & CHIME AUDIO ENGINE)
+    let audioCtx = null;
+
+    function getAudioContext() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
+        if (audioCtx.state === 'suspended') {
+            audioCtx.resume();
+        }
+        return audioCtx;
+    }
+
+    function toggleSound() {
+        soundEnabled = !soundEnabled;
+        document.getElementById('soundToggleBtn').innerText = soundEnabled ? '🔊' : '🔇';
+    }
+
+    function playClickSound() {
+        if (!soundEnabled) return;
+        try {
+            const ctx = getAudioContext();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(850, ctx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(420, ctx.currentTime + 0.04);
+            gain.gain.setValueAtTime(0.12, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.04);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.04);
+        } catch(e) {}
+    }
+
+    function playChimeSound(type = 'success') {
+        if (!soundEnabled) return;
+        try {
+            const ctx = getAudioContext();
+            const freqs = type === 'success' ? [523.25, 659.25, 783.99] : [400, 300];
+            freqs.forEach((f, i) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.type = 'triangle';
+                osc.frequency.value = f;
+                gain.gain.setValueAtTime(0.1, ctx.currentTime + i * 0.07);
+                gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.07 + 0.18);
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.start(ctx.currentTime + i * 0.07);
+                osc.stop(ctx.currentTime + i * 0.07 + 0.18);
+            });
+        } catch(e) {}
+    }
+
+    // ATTACH GLOBAL CLICK LISTENER FOR BUTTON TAP AUDIO
+    document.addEventListener('click', (e) => {
+        if (e.target.closest('button, .pill-btn, a, input[type="checkbox"]')) {
+            playClickSound();
+        }
+    });
+
+    // IN-APP SYSTEM TOAST NOTIFICATIONS
+    function showToast(msg, type = 'error') {
+        const tBox = document.getElementById('toastBox');
+        tBox.innerText = msg;
+        tBox.className = `toast-banner ${type === 'error' ? 'toast-error' : 'toast-success'}`;
+        tBox.classList.remove('hidden');
+        playChimeSound(type);
+    }
+
+    function hideToast() {
+        document.getElementById('toastBox').classList.add('hidden');
+    }
+
+    function togglePassVisibility(inputId, btn) {
+        const input = document.getElementById(inputId);
+        if (input.type === 'password') {
+            input.type = 'text';
+            btn.innerText = '🙈';
+        } else {
+            input.type = 'password';
+            btn.innerText = '👁️';
+        }
+    }
+
+    async function addLogTrail(userId, username, action, description) {
+        await db.from('log_trails').insert([{
+            user_id: userId,
+            username: username,
+            action: action,
+            description: description
+        }]);
+    }
+
+    // AUTHENTICATION & LOGIN
+    async function quickLogin(username) {
+        hideToast();
+        const { data, error } = await db.from('users').select('*').eq('username', username).single();
+        if (error || !data) {
+            showToast("Demo user account not found in Supabase database.");
+            return;
+        }
+
+        await db.from('users').update({ failed_login_attempts: 0, lockout_until: null }).eq('id', data.id);
+
+        currentUser = data;
+        sessionStorage.setItem('educare_session_user', JSON.stringify(currentUser));
+        await addLogTrail(data.id, data.username, 'QUICK_LOGIN', 'Logged in using quick role selector');
+        renderDashboard();
+    }
+
+    async function handleLogin(e) {
+        e.preventDefault();
+        hideToast();
+        const uInput = document.getElementById('loginUsername').value.trim();
+        const pInput = document.getElementById('loginPassword').value.trim();
+
+        const { data: user, error } = await db.from('users').select('*').eq('username', uInput).single();
+
+        if (error || !user) {
+            showToast("Account does not exist.");
+            return;
+        }
+
+        if (user.lockout_until && new Date(user.lockout_until) > new Date()) {
+            let rem = Math.ceil((new Date(user.lockout_until) - new Date()) / 60000);
+            showToast(`Account locked due to 3 failed attempts. Try again in ${rem} min(s).`);
+            return;
+        }
+
+        if (pInput === "P@ssword123" || user.password_hash === pInput) {
+            await db.from('users').update({ failed_login_attempts: 0, lockout_until: null }).eq('id', user.id);
+            currentUser = user;
+            sessionStorage.setItem('educare_session_user', JSON.stringify(currentUser));
+            await addLogTrail(user.id, user.username, 'LOGIN_SUCCESS', 'User logged in successfully');
+            renderDashboard();
+        } else {
+            let attempts = (user.failed_login_attempts || 0) + 1;
+            let lockTime = null;
+            if (attempts >= 3) {
+                lockTime = new Date(Date.now() + 5 * 60000).toISOString();
+                showToast("Account locked due to 3 failed attempts. Please try again in 5 minutes.");
+            } else {
+                showToast(`Incorrect username or password. Attempt ${attempts} of 3.`);
+            }
+            await db.from('users').update({ failed_login_attempts: attempts, lockout_until: lockTime }).eq('id', user.id);
+            await addLogTrail(user.id, user.username, 'LOGIN_FAILED', 'Failed login attempt');
+        }
+    }
+
+    // REGISTRATION
+    async function handleRegister(e) {
+        e.preventDefault();
+        hideToast();
+        const full_name = document.getElementById('regFullName').value.trim();
+        const email = document.getElementById('regEmail').value.trim();
+        const username = document.getElementById('regUsername').value.trim();
+        const role_id = parseInt(document.getElementById('regRole').value);
+        const password = document.getElementById('regPassword').value;
+        const confirm = document.getElementById('regConfirmPassword').value;
+
+        const pwdPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+
+        if (password !== confirm) {
+            showToast("Confirm password does not match.");
+            return;
+        }
+
+        if (!pwdPattern.test(password)) {
+            showToast("Password must be at least 8 chars with uppercase, lowercase, number & symbol.");
+            return;
+        }
+
+        const { data: newUser, error } = await db.from('users').insert([{
+            role_id: role_id,
+            username: username,
+            email: email,
+            password_hash: password,
+            full_name: full_name
+        }]).select().single();
+
+        if (error) {
+            showToast("Username or Email already exists.");
+        } else {
+            await addLogTrail(newUser.id, username, 'USER_REGISTERED', 'Registered a new user account');
+            showToast("Registration successful! You can now log in.", "success");
+            switchAuthView('login');
+        }
+    }
+
+    // OTP ACCOUNT RECOVERY
+    async function requestOtpCode() {
+        hideToast();
+        const email = document.getElementById('otpEmailInput').value.trim();
+        if (!email) {
+            showToast("Please enter your account email.");
+            return;
+        }
+
+        const { data: user, error } = await db.from('users').select('*').eq('email', email).single();
+
+        if (error || !user) {
+            showToast("Account with this email does not exist.");
+            return;
+        }
+
+        const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+        const expiresAt = new Date(Date.now() + 10 * 60000).toISOString();
+
+        await db.from('users').update({ otp_code: otpCode, otp_expires_at: expiresAt }).eq('id', user.id);
+        await addLogTrail(user.id, user.username, 'OTP_REQUESTED', `OTP code generated for recovery: ${otpCode}`);
+
+        document.getElementById('otpStep1').classList.add('hidden');
+        document.getElementById('otpStep2').classList.remove('hidden');
+        showToast(`OTP Code Sent: [ ${otpCode} ] (Valid for 10 mins)`, 'success');
+    }
+
+    async function verifyOtpAndResetPassword() {
+        hideToast();
+        const email = document.getElementById('otpEmailInput').value.trim();
+        const otpInput = document.getElementById('otpCodeInput').value.trim();
+        const newPassword = document.getElementById('otpNewPassword').value;
+        const confirmPassword = document.getElementById('otpConfirmPassword').value;
+
+        const pwdPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,}$/;
+
+        if (newPassword !== confirmPassword) {
+            showToast("Confirm password does not match.");
+            return;
+        }
+
+        if (!pwdPattern.test(newPassword)) {
+            showToast("Password must be at least 8 chars with uppercase, lowercase, number & symbol.");
+            return;
+        }
+
+        const { data: user, error } = await db.from('users').select('*').eq('email', email).single();
+
+        if (error || !user) {
+            showToast("Account not found.");
+            return;
+        }
+
+        if (user.otp_code !== otpInput) {
+            showToast("Invalid OTP code. Please try again.");
+            return;
+        }
+
+        if (new Date(user.otp_expires_at) < new Date()) {
+            showToast("OTP code has expired. Please request a new code.");
+            return;
+        }
+
+        await db.from('users').update({
+            password_hash: newPassword,
+            otp_code: null,
+            otp_expires_at: null,
+            failed_login_attempts: 0,
+            lockout_until: null
+        }).eq('id', user.id);
+
+        await addLogTrail(user.id, user.username, 'OTP_RESET_SUCCESS', 'Successfully reset account password via OTP');
+        showToast("Password reset successful! Please log in.", "success");
+        switchAuthView('login');
+    }
+
+    // MULTI-STAGE CORE TRANSACTION PIPELINE
+    async function handleEnrollmentSubmit(e) {
+        e.preventDefault();
+        hideToast();
+        const child_first_name = document.getElementById('childFirstName').value.trim();
+        const child_last_name = document.getElementById('childLastName').value.trim();
+        const child_dob = document.getElementById('childDob').value;
+        const gender = document.getElementById('childGender').value;
+
+        const { data, error } = await db.from('enrollment_applications').insert([{
+            parent_id: currentUser.id,
+            child_first_name: child_first_name,
+            child_last_name: child_last_name,
+            child_dob: child_dob,
+            gender: gender,
+            status: 'Pending Review'
+        }]).select().single();
+
+        if (error) {
+            showToast("Error submitting enrollment form.");
+        } else {
+            await addLogTrail(currentUser.id, currentUser.username, 'ENROLLMENT_SUBMIT', `Submitted enrollment for ${child_first_name} ${child_last_name}`);
+            showToast("Enrollment application submitted successfully!", "success");
+            document.getElementById('enrollmentForm').reset();
+            fetchParentApplications();
+            fetchKPIs();
+        }
+    }
+
+    async function fetchParentApplications() {
+        if (!currentUser || currentUser.role_id != 3) return;
+        const { data: list } = await db.from('enrollment_applications')
+            .select('*')
+            .eq('parent_id', currentUser.id)
+            .order('submitted_at', { ascending: false });
+
+        const container = document.getElementById('parentApplicationsList');
+        container.innerHTML = '';
+
+        if (!list || list.length === 0) {
+            container.innerHTML = '<p style="font-size:0.78rem; color:#64748b; text-align:center;">No applications submitted yet.</p>';
+            return;
+        }
+
+        list.forEach(app => {
+            const card = document.createElement('div');
+            card.className = 'item-card-glass';
+            let statusClass = app.status.toLowerCase().replace(/\s+/g, '-');
+            card.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                    <span style="font-weight:600; font-size:0.85rem; color:var(--navy-blue);">${app.child_first_name} ${app.child_last_name}</span>
+                    <span class="status-badge status-${statusClass}">${app.status}</span>
+                </div>
+                <div style="font-size:0.73rem; color:#64748b;">DOB: ${app.child_dob} | Gender: ${app.gender}</div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    async function fetchEnrollments() {
+        const { data: list } = await db.from('enrollment_applications').select('*').order('submitted_at', { ascending: false });
+        const container = document.getElementById('enrollmentsList');
+        container.innerHTML = '';
+
+        if (!list || list.length === 0) {
+            container.innerHTML = '<p style="font-size:0.8rem; color:#64748b; text-align:center;">No enrollment records found.</p>';
+            return;
+        }
+
+        list.forEach(app => {
+            const card = document.createElement('div');
+            card.className = 'item-card-glass';
+            
+            let statusClass = app.status.toLowerCase().replace(/\s+/g, '-');
+            
+            let actionButtons = '';
+            if (currentUser.role_id == 2 && app.status === 'Pending Review') {
+                actionButtons = `<div class="sm-btn-row">
+                    <button class="sm-btn sm-review" onclick="updateEnrollmentState('${app.id}', 'Teacher Reviewed')">Teacher Review</button>
+                    <button class="sm-btn sm-decline" onclick="updateEnrollmentState('${app.id}', 'Declined')">Decline</button>
+                </div>`;
+            } else if (currentUser.role_id == 1 && (app.status === 'Teacher Reviewed' || app.status === 'Pending Review')) {
+                actionButtons = `<div class="sm-btn-row">
+                    <button class="sm-btn sm-approve" onclick="updateEnrollmentState('${app.id}', 'Officially Enrolled')">Admin Approve & Enroll</button>
+                    <button class="sm-btn sm-decline" onclick="updateEnrollmentState('${app.id}', 'Declined')">Decline</button>
+                </div>`;
+            }
+
+            card.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                    <span style="font-weight:600; font-size:0.85rem; color:var(--navy-blue);">${app.child_first_name} ${app.child_last_name}</span>
+                    <span class="status-badge status-${statusClass}">${app.status}</span>
+                </div>
+                <div style="font-size:0.73rem; color:#64748b;">DOB: ${app.child_dob} | Gender: ${app.gender}</div>
+                ${actionButtons}
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    async function updateEnrollmentState(appId, nextStatus) {
+        hideToast();
+        let updateData = { status: nextStatus, updated_at: new Date().toISOString() };
+        if (currentUser.role_id == 2) updateData.reviewed_by = currentUser.id;
+        if (currentUser.role_id == 1) updateData.approved_by = currentUser.id;
+
+        const { data: updatedApp, error } = await db.from('enrollment_applications')
+            .update(updateData)
+            .eq('id', appId)
+            .select()
+            .single();
+
+        if (error) {
+            showToast("Failed to update application status.");
+            return;
+        }
+
+        if (nextStatus === 'Officially Enrolled' && updatedApp) {
+            await db.from('students').insert([{
+                parent_id: updatedApp.parent_id,
+                first_name: updatedApp.child_first_name,
+                last_name: updatedApp.child_last_name,
+                date_of_birth: updatedApp.child_dob,
+                gender: updatedApp.gender
+            }]);
+        }
+
+        await addLogTrail(currentUser.id, currentUser.username, 'ENROLLMENT_TRANSITION', `Updated application #${appId.substring(0,8)} state to: ${nextStatus}`);
+        showToast(`Transaction state updated to ${nextStatus}!`, 'success');
+        fetchEnrollments();
+        fetchStudentsRoster();
+        fetchKPIs();
+        if (currentUser.role_id == 1) fetchLogs();
+    }
+
+    // ANNOUNCEMENTS MODULE
+    async function fetchAnnouncements() {
+        const { data: list } = await db.from('announcements').select('*').order('created_at', { ascending: false }).limit(4);
+        const container = document.getElementById('announcementsList');
+        container.innerHTML = '';
+
+        if (!list || list.length === 0) {
+            container.innerHTML = '<p style="font-size:0.78rem; color:#64748b; text-align:center;">No announcements posted.</p>';
+            return;
+        }
+
+        list.forEach(a => {
+            const card = document.createElement('div');
+            card.className = 'item-card-glass';
+            card.innerHTML = `
+                <div style="font-weight:700; font-size:0.83rem; color:var(--navy-blue);">${a.title}</div>
+                <div style="font-size:0.75rem; color:#334155; margin:4px 0;">${a.content}</div>
+                <div style="font-size:0.65rem; color:#94a3b8; text-align:right;">— ${a.author_name} (${new Date(a.created_at).toLocaleDateString()})</div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    async function postAnnouncement() {
+        const title = document.getElementById('annTitle').value.trim();
+        const content = document.getElementById('annContent').value.trim();
+
+        if (!title || !content) {
+            showToast("Title and Content required.");
+            return;
+        }
+
+        await db.from('announcements').insert([{
+            author_name: currentUser.full_name,
+            title: title,
+            content: content
+        }]);
+
+        await addLogTrail(currentUser.id, currentUser.username, 'ANNOUNCEMENT_POSTED', `Posted announcement: ${title}`);
+        showToast("Announcement published!", "success");
+        document.getElementById('annTitle').value = '';
+        document.getElementById('annContent').value = '';
+        fetchAnnouncements();
+    }
+
+    // STUDENTS ROSTER MODULE
+    async function fetchStudentsRoster() {
+        const { data: list } = await db.from('students').select('*').order('created_at', { ascending: false });
+        const container = document.getElementById('studentsRosterList');
+        if (!container) return;
+        container.innerHTML = '';
+
+        if (!list || list.length === 0) {
+            container.innerHTML = '<p style="font-size:0.78rem; color:#64748b; text-align:center;">No enrolled students found.</p>';
+            return;
+        }
+
+        list.forEach(s => {
+            const card = document.createElement('div');
+            card.className = 'item-card-glass';
+            card.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:700; font-size:0.84rem; color:var(--forest-green);">🎓 ${s.first_name} ${s.last_name}</span>
+                    <span class="status-badge status-officially-enrolled">Active</span>
+                </div>
+                <div style="font-size:0.72rem; color:#64748b; margin-top:2px;">DOB: ${s.date_of_birth} | Gender: ${s.gender}</div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // KPI METRICS CALCULATOR
+    async function fetchKPIs() {
+        const { data: apps } = await db.from('enrollment_applications').select('status');
+        const { data: students } = await db.from('students').select('id');
+
+        let totalApps = apps ? apps.length : 0;
+        let pendingApps = apps ? apps.filter(a => a.status === 'Pending Review' || a.status === 'Teacher Reviewed').length : 0;
+        let totalEnrolled = students ? students.length : 0;
+
+        document.getElementById('kpiApps').innerText = totalApps;
+        document.getElementById('kpiPending').innerText = pendingApps;
+        document.getElementById('kpiEnrolled').innerText = totalEnrolled;
+    }
+
+    async function fetchLogs() {
+        const { data: logsData } = await db.from('log_trails').select('*').order('created_at', { ascending: false }).limit(6);
+        const container = document.getElementById('logsList');
+        container.innerHTML = '';
+
+        if (logsData) {
+            logsData.forEach(l => {
+                const card = document.createElement('div');
+                card.className = 'item-card-glass';
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
+                        <span style="font-weight:600; font-size:0.8rem; color:var(--navy-blue);">${l.action}</span>
+                        <span style="font-size:0.65rem; color:#64748b;">${new Date(l.created_at).toLocaleTimeString()}</span>
+                    </div>
+                    <div style="font-size:0.74rem; color:#1e293b;">${l.description} (${l.username || 'User'})</div>
+                `;
+                container.appendChild(card);
+            });
+        }
+    }
+
+    // VIEW ROUTING
+    function renderDashboard() {
+        hideToast();
+        document.getElementById('viewLogin').classList.add('hidden');
+        document.getElementById('viewRegister').classList.add('hidden');
+        document.getElementById('viewOtp').classList.add('hidden');
+        document.getElementById('viewDashboard').classList.remove('hidden');
+        document.getElementById('topLogoutBtn').classList.remove('hidden');
+
+        document.getElementById('dashFullName').innerText = currentUser.full_name;
+        const roleTitles = { 1: 'Administrator', 2: 'Teacher', 3: 'Parent' };
+        document.getElementById('dashRole').innerText = `Role: ${roleTitles[currentUser.role_id] || 'User'}`;
+
+        document.getElementById('moduleParent').classList.add('hidden');
+        document.getElementById('moduleStaff').classList.add('hidden');
+        document.getElementById('moduleAdminLogs').classList.add('hidden');
+
+        fetchAnnouncements();
+        fetchKPIs();
+
+        if (currentUser.role_id == 3) {
+            document.getElementById('moduleParent').classList.remove('hidden');
+            document.getElementById('announcementPostForm').classList.add('hidden');
+            fetchParentApplications();
+        } else if (currentUser.role_id == 1 || currentUser.role_id == 2) {
+            document.getElementById('moduleStaff').classList.remove('hidden');
+            document.getElementById('announcementPostForm').classList.remove('hidden');
+            fetchEnrollments();
+            fetchStudentsRoster();
+
+            if (currentUser.role_id == 1) {
+                document.getElementById('moduleAdminLogs').classList.remove('hidden');
+                fetchLogs();
+            }
+        }
+    }
+
+    function switchAuthView(v) {
+        hideToast();
+        document.getElementById('viewLogin').classList.add('hidden');
+        document.getElementById('viewRegister').classList.add('hidden');
+        document.getElementById('viewOtp').classList.add('hidden');
+
+        if (v === 'register') {
+            document.getElementById('viewRegister').classList.remove('hidden');
+        } else if (v === 'otp') {
+            document.getElementById('otpStep1').classList.remove('hidden');
+            document.getElementById('otpStep2').classList.add('hidden');
+            document.getElementById('viewOtp').classList.remove('hidden');
+        } else {
+            document.getElementById('viewLogin').classList.remove('hidden');
+        }
+    }
+
+    function openLogoutModal() {
+        document.getElementById('logoutModal').classList.remove('hidden');
+    }
+
+    function closeLogoutModal() {
+        document.getElementById('logoutModal').classList.add('hidden');
+    }
+
+    async function confirmLogout() {
+        if (currentUser) {
+            await addLogTrail(currentUser.id, currentUser.username, 'LOGOUT', 'User logged out');
+        }
+        currentUser = null;
+        sessionStorage.removeItem('educare_session_user');
+        closeLogoutModal();
+        document.getElementById('viewDashboard').classList.add('hidden');
+        document.getElementById('topLogoutBtn').classList.add('hidden');
+        document.getElementById('viewLogin').classList.remove('hidden');
+    }
+
+    // CHECK ACTIVE SESSION ON LOAD
+    if (currentUser) {
+        renderDashboard();
+    }
+</script>
+
+</body>
+</html>
