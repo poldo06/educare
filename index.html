@@ -187,7 +187,7 @@
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
-            margin-bottom: 18px;
+            margin-bottom: 20px;
         }
 
         .kpi-card {
@@ -592,14 +592,15 @@
         <!-- 4. DASHBOARD VIEW -->
         <div id="viewDashboard" class="hidden">
 
-            <!-- PROFILE CARD & KPI SUMMARY METRICS -->
+            <!-- PROFILE CARD -->
             <div class="glass-neu-card" style="padding: 16px 20px; border-left: 5px solid var(--forest-green);">
                 <div style="font-size:0.7rem; color:#64748b; text-transform:uppercase; font-weight:600;">Logged in as</div>
                 <div id="dashFullName" style="font-weight:700; color:var(--navy-blue); font-size:1.05rem;">User Name</div>
                 <div id="dashRole" style="font-size:0.75rem; color:var(--forest-green); font-weight:600; margin-top:2px;">Role: Parent</div>
             </div>
 
-            <div class="kpi-grid">
+            <!-- KPI SUMMARY METRICS (RESTRICTED TO TEACHER AND ADMIN ONLY) -->
+            <div id="kpiGrid" class="kpi-grid hidden">
                 <div class="kpi-card">
                     <div id="kpiApps" class="kpi-val">0</div>
                     <div class="kpi-lbl">Applications</div>
@@ -713,7 +714,7 @@
     let currentUser = JSON.parse(sessionStorage.getItem('educare_session_user')) || null;
     let soundEnabled = true;
 
-    // WEB AUDIO API SYNTHESIZER (SYNTHETIC UI CLICK & CHIME AUDIO ENGINE)
+    // WEB AUDIO API SYNTHESIZER
     let audioCtx = null;
 
     function getAudioContext() {
@@ -769,7 +770,6 @@
         } catch(e) {}
     }
 
-    // ATTACH GLOBAL CLICK LISTENER FOR BUTTON TAP AUDIO
     document.addEventListener('click', (e) => {
         if (e.target.closest('button, .pill-btn, a, input[type="checkbox"]')) {
             playClickSound();
@@ -1006,7 +1006,6 @@
             showToast("Enrollment application submitted successfully!", "success");
             document.getElementById('enrollmentForm').reset();
             fetchParentApplications();
-            fetchKPIs();
         }
     }
 
@@ -1189,6 +1188,7 @@
 
     // KPI METRICS CALCULATOR
     async function fetchKPIs() {
+        if (!currentUser || (currentUser.role_id != 1 && currentUser.role_id != 2)) return;
         const { data: apps } = await db.from('enrollment_applications').select('status');
         const { data: students } = await db.from('students').select('id');
 
@@ -1235,20 +1235,22 @@
         const roleTitles = { 1: 'Administrator', 2: 'Teacher', 3: 'Parent' };
         document.getElementById('dashRole').innerText = `Role: ${roleTitles[currentUser.role_id] || 'User'}`;
 
+        document.getElementById('kpiGrid').classList.add('hidden');
         document.getElementById('moduleParent').classList.add('hidden');
         document.getElementById('moduleStaff').classList.add('hidden');
         document.getElementById('moduleAdminLogs').classList.add('hidden');
 
         fetchAnnouncements();
-        fetchKPIs();
 
         if (currentUser.role_id == 3) {
             document.getElementById('moduleParent').classList.remove('hidden');
             document.getElementById('announcementPostForm').classList.add('hidden');
             fetchParentApplications();
         } else if (currentUser.role_id == 1 || currentUser.role_id == 2) {
+            document.getElementById('kpiGrid').classList.remove('hidden');
             document.getElementById('moduleStaff').classList.remove('hidden');
             document.getElementById('announcementPostForm').classList.remove('hidden');
+            fetchKPIs();
             fetchEnrollments();
             fetchStudentsRoster();
 
