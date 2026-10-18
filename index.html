@@ -386,6 +386,8 @@
         .status-teacher-reviewed { background: #e0f2fe; color: #0369a1; }
         .status-officially-enrolled { background: #dcfce7; color: #166534; }
         .status-declined { background: #fee2e2; color: #991b1b; }
+        .status-present { background: #dcfce7; color: #166534; }
+        .status-absent { background: #fee2e2; color: #991b1b; }
 
         .sm-btn-row {
             display: flex;
@@ -633,8 +635,33 @@
                 </div>
             </div>
 
+            <!-- DAILY CLASS ACTIVITY JOURNAL / STREAM -->
+            <div class="glass-neu-card">
+                <h3 class="card-title">Class Activity Journal 🎨</h3>
+                <div id="activitiesList"></div>
+
+                <div id="activityPostForm" class="hidden" style="margin-top:15px; border-top:1px solid rgba(0,0,0,0.08); padding-top:12px;">
+                    <div class="form-group">
+                        <label class="form-label">Activity Name</label>
+                        <input type="text" id="actTitle" class="neu-input" placeholder="e.g., Morning Storytelling & Painting">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Activity Description</label>
+                        <textarea id="actContent" class="neu-input" style="height:55px; resize:none;" placeholder="Describe what the children learned..."></textarea>
+                    </div>
+                    <button type="button" class="neu-btn neu-btn-primary" onclick="postDailyActivity()">LOG CLASS ACTIVITY</button>
+                </div>
+            </div>
+
             <!-- PARENT MODULE -->
             <div id="moduleParent" class="hidden">
+                <!-- PARENT FEATURE 1: CHILD ATTENDANCE TRACKER -->
+                <div class="glass-neu-card">
+                    <h3 class="card-title">Child Attendance Record 📅</h3>
+                    <div id="parentAttendanceTracker"></div>
+                </div>
+
+                <!-- PARENT FEATURE 2: ENROLLMENT FORM -->
                 <div class="glass-neu-card">
                     <h3 class="card-title">Enrollment Application</h3>
                     <form id="enrollmentForm" onsubmit="handleEnrollmentSubmit(event)">
@@ -665,10 +692,32 @@
                     <h3 class="card-title">My Submitted Applications</h3>
                     <div id="parentApplicationsList"></div>
                 </div>
+
+                <!-- PARENT FEATURE 3: DIRECT INQUIRY MESSAGE BOX -->
+                <div class="glass-neu-card">
+                    <h3 class="card-title">Send Staff Inquiry ✉️</h3>
+                    <form onsubmit="handleSendInquiry(event)">
+                        <div class="form-group">
+                            <label class="form-label">Subject</label>
+                            <input type="text" id="inquirySubject" class="neu-input" placeholder="e.g., Absence Notice / Medical Request" required>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Message</label>
+                            <textarea id="inquiryMessage" class="neu-input" style="height:60px; resize:none;" placeholder="Write your message to staff..." required></textarea>
+                        </div>
+                        <button type="submit" class="neu-btn neu-btn-primary">SEND MESSAGE</button>
+                    </form>
+                </div>
             </div>
 
             <!-- STAFF & ADMIN TRANSACTION PIPELINE & ROSTER -->
             <div id="moduleStaff" class="hidden">
+                <!-- TEACHER/ADMIN FEATURE 1: DAILY ATTENDANCE MARKER -->
+                <div class="glass-neu-card">
+                    <h3 class="card-title">Mark Today's Attendance ⏱️</h3>
+                    <div id="attendanceMarkingList"></div>
+                </div>
+
                 <div class="glass-neu-card">
                     <h3 class="card-title">Enrollment Pipeline</h3>
                     <div id="enrollmentsList"></div>
@@ -678,12 +727,37 @@
                     <h3 class="card-title">Official Enrolled Students 🎓</h3>
                     <div id="studentsRosterList"></div>
                 </div>
+
+                <!-- TEACHER/ADMIN FEATURE 2: PARENT INQUIRIES INBOX -->
+                <div class="glass-neu-card">
+                    <h3 class="card-title">Parent Inquiries Inbox 📬</h3>
+                    <div id="inquiriesInboxList"></div>
+                </div>
             </div>
 
-            <!-- ADMIN AUDIT LOG TRAIL -->
-            <div id="moduleAdminLogs" class="glass-neu-card hidden">
-                <h3 class="card-title">System Log Trail</h3>
-                <div id="logsList"></div>
+            <!-- ADMIN ONLY MODULE: USER MANAGEMENT & CSV REPORT EXPORTER -->
+            <div id="moduleAdminLogs" class="hidden">
+                <!-- ADMIN FEATURE 1: CSV DATA EXPORTER -->
+                <div class="glass-neu-card">
+                    <h3 class="card-title">Export Official Data 📥</h3>
+                    <p style="font-size:0.75rem; color:#64748b; margin-bottom:12px;">Download current records as CSV spreadsheets:</p>
+                    <div style="display:flex; gap:8px;">
+                        <button class="sm-btn sm-review" onclick="exportDataToCSV('students')">Students CSV</button>
+                        <button class="sm-btn sm-approve" onclick="exportDataToCSV('enrollment_applications')">Applications CSV</button>
+                        <button class="sm-btn sm-decline" onclick="exportDataToCSV('log_trails')" style="background:var(--navy-blue);">Audit Logs CSV</button>
+                    </div>
+                </div>
+
+                <!-- ADMIN FEATURE 2: REGISTERED USERS DIRECTORY (WITH EDIT & DELETE) -->
+                <div class="glass-neu-card">
+                    <h3 class="card-title">User Accounts Manager 👥</h3>
+                    <div id="usersDirectoryList"></div>
+                </div>
+
+                <div class="glass-neu-card">
+                    <h3 class="card-title">System Log Trail</h3>
+                    <div id="logsList"></div>
+                </div>
             </div>
 
         </div>
@@ -698,6 +772,34 @@
             <div style="display:flex; gap:12px;">
                 <button type="button" class="neu-btn" onclick="closeLogoutModal()" style="flex:1;">Cancel</button>
                 <button type="button" class="neu-btn neu-btn-primary" onclick="confirmLogout()" style="flex:1; background:#ef4444;">Logout</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT USER MODAL -->
+    <div id="editUserModal" class="modal-mask hidden">
+        <div class="modal-box">
+            <h3 style="margin:0 0 12px; color:var(--navy-blue);">Edit User Account</h3>
+            <input type="hidden" id="editUserId">
+            <div class="form-group" style="text-align:left;">
+                <label class="form-label">Full Name</label>
+                <input type="text" id="editFullName" class="neu-input" required>
+            </div>
+            <div class="form-group" style="text-align:left;">
+                <label class="form-label">Email</label>
+                <input type="email" id="editEmail" class="neu-input" required>
+            </div>
+            <div class="form-group" style="text-align:left;">
+                <label class="form-label">Account Role</label>
+                <select id="editRole" class="neu-input">
+                    <option value="1">Admin</option>
+                    <option value="2">Teacher</option>
+                    <option value="3">Parent</option>
+                </select>
+            </div>
+            <div style="display:flex; gap:12px; margin-top:20px;">
+                <button type="button" class="neu-btn" onclick="closeEditUserModal()" style="flex:1;">Cancel</button>
+                <button type="button" class="neu-btn neu-btn-primary" onclick="saveUserEdit()" style="flex:1;">Save Changes</button>
             </div>
         </div>
     </div>
@@ -1111,6 +1213,7 @@
         showToast(`Transaction state updated to ${nextStatus}!`, 'success');
         fetchEnrollments();
         fetchStudentsRoster();
+        fetchAttendanceMarkingList();
         fetchKPIs();
         if (currentUser.role_id == 1) fetchLogs();
     }
@@ -1158,6 +1261,318 @@
         document.getElementById('annTitle').value = '';
         document.getElementById('annContent').value = '';
         fetchAnnouncements();
+    }
+
+    // DAILY CLASS ACTIVITY JOURNAL MODULE
+    async function fetchDailyActivities() {
+        const { data: list } = await db.from('daily_activities').select('*').order('created_at', { ascending: false }).limit(4);
+        const container = document.getElementById('activitiesList');
+        if (!container) return;
+        container.innerHTML = '';
+
+        if (!list || list.length === 0) {
+            container.innerHTML = '<p style="font-size:0.78rem; color:#64748b; text-align:center;">No class activities logged today.</p>';
+            return;
+        }
+
+        list.forEach(act => {
+            const card = document.createElement('div');
+            card.className = 'item-card-glass';
+            card.innerHTML = `
+                <div style="font-weight:700; font-size:0.83rem; color:var(--forest-green);">🎨 ${act.activity_name}</div>
+                <div style="font-size:0.74rem; color:#334155; margin:4px 0;">${act.description}</div>
+                <div style="font-size:0.65rem; color:#94a3b8; text-align:right;">— ${act.posted_by} (${new Date(act.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})})</div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    async function postDailyActivity() {
+        const actTitle = document.getElementById('actTitle').value.trim();
+        const actContent = document.getElementById('actContent').value.trim();
+
+        if (!actTitle || !actContent) {
+            showToast("Activity Name and Description required.");
+            return;
+        }
+
+        await db.from('daily_activities').insert([{
+            activity_name: actTitle,
+            description: actContent,
+            posted_by: currentUser.full_name
+        }]);
+
+        await addLogTrail(currentUser.id, currentUser.username, 'ACTIVITY_LOGGED', `Logged daily class activity: ${actTitle}`);
+        showToast("Class activity logged successfully!", "success");
+        document.getElementById('actTitle').value = '';
+        document.getElementById('actContent').value = '';
+        fetchDailyActivities();
+    }
+
+    // ATTENDANCE MARKING & PARENT TRACKING MODULE
+    async function fetchAttendanceMarkingList() {
+        const container = document.getElementById('attendanceMarkingList');
+        if (!container) return;
+
+        const { data: students } = await db.from('students').select('*').order('first_name', { ascending: true });
+
+        container.innerHTML = '';
+        if (!students || students.length === 0) {
+            container.innerHTML = '<p style="font-size:0.78rem; color:#64748b; text-align:center;">No enrolled students to mark attendance.</p>';
+            return;
+        }
+
+        const todayStr = new Date().toISOString().split('T')[0];
+        const { data: todayRecords } = await db.from('attendance').select('*').eq('date', todayStr);
+
+        students.forEach(s => {
+            const record = todayRecords ? todayRecords.find(r => r.student_id === s.id) : null;
+            const currentStatus = record ? record.status : 'Unmarked';
+
+            const card = document.createElement('div');
+            card.className = 'item-card-glass';
+            card.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:600; font-size:0.83rem; color:var(--navy-blue);">${s.first_name} ${s.last_name}</span>
+                    <span class="status-badge ${currentStatus === 'Present' ? 'status-present' : currentStatus === 'Absent' ? 'status-absent' : 'status-pending-review'}">${currentStatus}</span>
+                </div>
+                <div class="sm-btn-row">
+                    <button class="sm-btn sm-approve" onclick="markStudentAttendance('${s.id}', '${s.first_name} ${s.last_name}', 'Present')">Mark Present</button>
+                    <button class="sm-btn sm-decline" onclick="markStudentAttendance('${s.id}', '${s.first_name} ${s.last_name}', 'Absent')">Mark Absent</button>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    async function markStudentAttendance(studentId, studentName, status) {
+        hideToast();
+        const todayStr = new Date().toISOString().split('T')[0];
+
+        const { data: existing } = await db.from('attendance')
+            .select('id')
+            .eq('student_id', studentId)
+            .eq('date', todayStr)
+            .single();
+
+        if (existing) {
+            await db.from('attendance').update({ status: status, marked_by: currentUser.full_name }).eq('id', existing.id);
+        } else {
+            await db.from('attendance').insert([{
+                student_id: studentId,
+                student_name: studentName,
+                date: todayStr,
+                status: status,
+                marked_by: currentUser.full_name
+            }]);
+        }
+
+        await addLogTrail(currentUser.id, currentUser.username, 'ATTENDANCE_MARKED', `Marked ${studentName} as ${status}`);
+        showToast(`${studentName} marked ${status}!`, "success");
+        fetchAttendanceMarkingList();
+    }
+
+    async function fetchParentAttendanceTracker() {
+        const container = document.getElementById('parentAttendanceTracker');
+        if (!container || !currentUser) return;
+
+        const { data: records } = await db.from('attendance').select('*').order('created_at', { ascending: false }).limit(5);
+
+        container.innerHTML = '';
+        if (!records || records.length === 0) {
+            container.innerHTML = '<p style="font-size:0.78rem; color:#64748b; text-align:center;">No attendance records found yet.</p>';
+            return;
+        }
+
+        records.forEach(r => {
+            const card = document.createElement('div');
+            card.className = 'item-card-glass';
+            card.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:600; font-size:0.83rem; color:var(--navy-blue);">${r.student_name}</span>
+                    <span class="status-badge ${r.status === 'Present' ? 'status-present' : 'status-absent'}">${r.status}</span>
+                </div>
+                <div style="font-size:0.72rem; color:#64748b; margin-top:2px;">Date: ${r.date} | Marked by: ${r.marked_by || 'Teacher'}</div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // INQUIRIES & MESSAGING MODULE
+    async function handleSendInquiry(e) {
+        e.preventDefault();
+        hideToast();
+        const subject = document.getElementById('inquirySubject').value.trim();
+        const message = document.getElementById('inquiryMessage').value.trim();
+
+        const { error } = await db.from('inquiries').insert([{
+            parent_id: currentUser.id,
+            parent_name: currentUser.full_name,
+            subject: subject,
+            message: message,
+            status: 'Unread'
+        }]);
+
+        if (error) {
+            showToast("Failed to send inquiry message.");
+        } else {
+            await addLogTrail(currentUser.id, currentUser.username, 'INQUIRY_SENT', `Sent inquiry: ${subject}`);
+            showToast("Inquiry sent to daycare staff successfully!", "success");
+            document.getElementById('inquirySubject').value = '';
+            document.getElementById('inquiryMessage').value = '';
+        }
+    }
+
+    async function fetchInquiriesInbox() {
+        const container = document.getElementById('inquiriesInboxList');
+        if (!container) return;
+
+        const { data: list } = await db.from('inquiries').select('*').order('created_at', { ascending: false }).limit(5);
+
+        container.innerHTML = '';
+        if (!list || list.length === 0) {
+            container.innerHTML = '<p style="font-size:0.78rem; color:#64748b; text-align:center;">No messages in inbox.</p>';
+            return;
+        }
+
+        list.forEach(inq => {
+            const card = document.createElement('div');
+            card.className = 'item-card-glass';
+            card.innerHTML = `
+                <div style="font-weight:700; font-size:0.83rem; color:var(--navy-blue);">${inq.subject}</div>
+                <div style="font-size:0.75rem; color:#334155; margin:3px 0;">${inq.message}</div>
+                <div style="font-size:0.65rem; color:#94a3b8; text-align:right;">From: ${inq.parent_name} (${new Date(inq.created_at).toLocaleDateString()})</div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    // ADMIN USER MANAGEMENT (DIRECT DATABASE EDIT & DELETE)
+    async function fetchUsersDirectory() {
+        const container = document.getElementById('usersDirectoryList');
+        if (!container) return;
+
+        const { data: users } = await db.from('users').select('*').order('created_at', { ascending: false });
+
+        container.innerHTML = '';
+        if (!users || users.length === 0) {
+            container.innerHTML = '<p style="font-size:0.78rem; color:#64748b; text-align:center;">No registered accounts.</p>';
+            return;
+        }
+
+        const roleNames = { 1: 'Admin', 2: 'Teacher', 3: 'Parent' };
+
+        users.forEach(u => {
+            const safeFullName = (u.full_name || '').replace(/'/g, "\\'");
+            const safeEmail = (u.email || '').replace(/'/g, "\\'");
+            const safeUsername = (u.username || '').replace(/'/g, "\\'");
+
+            const card = document.createElement('div');
+            card.className = 'item-card-glass';
+            card.innerHTML = `
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <span style="font-weight:700; font-size:0.83rem; color:var(--navy-blue);">${u.full_name} (@${u.username})</span>
+                    <span class="status-badge status-teacher-reviewed">${roleNames[u.role_id] || 'User'}</span>
+                </div>
+                <div style="font-size:0.72rem; color:#64748b; margin-top:2px;">Email: ${u.email}</div>
+                <div class="sm-btn-row">
+                    <button class="sm-btn sm-review" onclick="openEditUserModal('${u.id}', '${safeFullName}', '${safeEmail}', ${u.role_id})">✏️ Edit</button>
+                    <button class="sm-btn sm-decline" onclick="deleteUser('${u.id}', '${safeUsername}')">🗑️ Delete</button>
+                </div>
+            `;
+            container.appendChild(card);
+        });
+    }
+
+    function openEditUserModal(id, fullName, email, roleId) {
+        document.getElementById('editUserId').value = id;
+        document.getElementById('editFullName').value = fullName;
+        document.getElementById('editEmail').value = email;
+        document.getElementById('editRole').value = roleId;
+        document.getElementById('editUserModal').classList.remove('hidden');
+    }
+
+    function closeEditUserModal() {
+        document.getElementById('editUserModal').classList.add('hidden');
+    }
+
+    async function saveUserEdit() {
+        hideToast();
+        const id = document.getElementById('editUserId').value;
+        const fullName = document.getElementById('editFullName').value.trim();
+        const email = document.getElementById('editEmail').value.trim();
+        const roleId = parseInt(document.getElementById('editRole').value);
+
+        if (!fullName || !email) {
+            showToast("Full Name and Email are required.");
+            return;
+        }
+
+        const { error } = await db.from('users').update({
+            full_name: fullName,
+            email: email,
+            role_id: roleId,
+            updated_at: new Date().toISOString()
+        }).eq('id', id);
+
+        if (error) {
+            showToast("Failed to update user account in database.");
+        } else {
+            await addLogTrail(currentUser.id, currentUser.username, 'USER_UPDATED', `Updated account ID: ${id.substring(0,8)}`);
+            showToast("User account updated directly in database!", "success");
+            closeEditUserModal();
+            fetchUsersDirectory();
+            if (currentUser.role_id == 1) fetchLogs();
+        }
+    }
+
+    async function deleteUser(id, username) {
+        hideToast();
+        if (currentUser.id === id) {
+            showToast("You cannot delete your own active administrator account.");
+            return;
+        }
+
+        if (!confirm(`Are you sure you want to permanently delete user @${username} from database?`)) {
+            return;
+        }
+
+        const { error } = await db.from('users').delete().eq('id', id);
+
+        if (error) {
+            showToast("Failed to delete user account from database.");
+        } else {
+            await addLogTrail(currentUser.id, currentUser.username, 'USER_DELETED', `Permanently deleted user: @${username}`);
+            showToast(`User @${username} deleted directly from database!`, "success");
+            fetchUsersDirectory();
+            if (currentUser.role_id == 1) fetchLogs();
+        }
+    }
+
+    // CSV REPORT EXPORTER
+    async function exportDataToCSV(tableName) {
+        hideToast();
+        const { data, error } = await db.from(tableName).select('*');
+
+        if (error || !data || data.length === 0) {
+            showToast(`No records found in ${tableName} table to export.`);
+            return;
+        }
+
+        const headers = Object.keys(data[0]).join(',');
+        const rows = data.map(obj => Object.values(obj).map(v => `"${String(v || '').replace(/"/g, '""')}"`).join(','));
+        const csvContent = "data:text/csv;charset=utf-8," + [headers, ...rows].join("\n");
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `StBenedict_${tableName}_Report.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        await addLogTrail(currentUser.id, currentUser.username, 'REPORT_EXPORTED', `Exported ${tableName} report as CSV`);
+        showToast(`Exported ${tableName} report successfully!`, "success");
     }
 
     // STUDENTS ROSTER MODULE
@@ -1241,21 +1656,28 @@
         document.getElementById('moduleAdminLogs').classList.add('hidden');
 
         fetchAnnouncements();
+        fetchDailyActivities();
 
         if (currentUser.role_id == 3) {
             document.getElementById('moduleParent').classList.remove('hidden');
             document.getElementById('announcementPostForm').classList.add('hidden');
+            document.getElementById('activityPostForm').classList.add('hidden');
             fetchParentApplications();
+            fetchParentAttendanceTracker();
         } else if (currentUser.role_id == 1 || currentUser.role_id == 2) {
             document.getElementById('kpiGrid').classList.remove('hidden');
             document.getElementById('moduleStaff').classList.remove('hidden');
             document.getElementById('announcementPostForm').classList.remove('hidden');
+            document.getElementById('activityPostForm').classList.remove('hidden');
             fetchKPIs();
+            fetchAttendanceMarkingList();
             fetchEnrollments();
             fetchStudentsRoster();
+            fetchInquiriesInbox();
 
             if (currentUser.role_id == 1) {
                 document.getElementById('moduleAdminLogs').classList.remove('hidden');
+                fetchUsersDirectory();
                 fetchLogs();
             }
         }
