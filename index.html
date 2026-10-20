@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mobile Educational Management System - St. Benedict Daycare Center</title>
+    <title>Educational Management System - St. Benedict Daycare Center</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- SUPABASE JS SDK CDN -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -34,11 +34,12 @@
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            overflow: hidden;
+            overflow-x: hidden;
+            transition: all 0.3s ease;
         }
 
-        /* MOBILE APP CONTAINER CANVAS */
-        .mobile-frame {
+        /* DEFAULT: MOBILE APP CONTAINER CANVAS (FOR PARENT & TEACHER) */
+        .app-frame {
             width: 100%;
             max-width: 412px;
             height: 100vh;
@@ -51,19 +52,30 @@
             overflow: hidden;
             position: relative;
             border: 6px solid rgba(255, 255, 255, 0.12);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         @media (max-width: 450px) {
-            .mobile-frame {
+            .app-frame {
                 border-radius: 0;
                 max-height: 100vh;
                 border: none;
             }
         }
 
+        /* ADMIN WEBPAGE UI OVERRIDE (EXPANDS CANAVAS TO DESKTOP WEB DASHBOARD) */
+        .app-frame.admin-web-mode {
+            max-width: 1380px;
+            height: 92vh;
+            max-height: none;
+            border-radius: 28px;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 30px 70px rgba(0, 0, 0, 0.6);
+        }
+
         /* GLASS HEADER */
         .app-header {
-            padding: 18px 20px;
+            padding: 18px 24px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -118,8 +130,7 @@
         }
 
         .icon-btn-glass {
-            width: 36px;
-            height: 36px;
+            padding: 8px 14px;
             border-radius: 12px;
             background: rgba(255, 255, 255, 0.12);
             border: 1px solid rgba(255, 255, 255, 0.25);
@@ -128,7 +139,9 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            font-size: 0.95rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            gap: 6px;
             transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
@@ -182,12 +195,28 @@
             justify-content: space-between;
         }
 
+        /* RESPONSIVE GRID SYSTEM FOR ADMIN WEBPAGE MODE */
+        .web-grid-layout {
+            display: block;
+        }
+
+        .admin-web-mode .web-grid-layout {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+            gap: 20px;
+        }
+
         /* KPI ANALYTICS GRID */
         .kpi-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 10px;
             margin-bottom: 20px;
+        }
+
+        .admin-web-mode .kpi-grid {
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
         }
 
         .kpi-card {
@@ -437,6 +466,7 @@
             border-radius: 24px;
             padding: 24px;
             width: 100%;
+            max-width: 400px;
             text-align: center;
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
             animation: scaleUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
@@ -452,14 +482,14 @@
 </head>
 <body>
 
-<div class="mobile-frame">
+<div id="appFrame" class="app-frame">
 
     <div class="app-header">
         <div style="display:flex; align-items:center; gap:12px;">
             <div class="brand-badge">SB</div>
             <div class="brand-text">
-                <h1>ST. BENEDICT DAYCARE</h1>
-                <p>Mobile Educational Management</p>
+                <h1 id="portalHeaderTitle">ST. BENEDICT DAYCARE</h1>
+                <p id="portalHeaderSubtitle">Mobile Educational Management</p>
             </div>
         </div>
         <div class="header-actions">
@@ -473,7 +503,7 @@
         <div id="toastBox" class="toast-banner hidden"></div>
 
         <!-- 1. LOGIN VIEW -->
-        <div id="viewLogin">
+        <div id="viewLogin" style="max-width: 400px; margin: 0 auto;">
             <div class="glass-neu-card">
                 <h2 class="card-title">Sign In</h2>
 
@@ -507,7 +537,7 @@
         </div>
 
         <!-- 2. REGISTER VIEW -->
-        <div id="viewRegister" class="hidden">
+        <div id="viewRegister" class="hidden" style="max-width: 400px; margin: 0 auto;">
             <div class="glass-neu-card">
                 <h2 class="card-title">Create Account</h2>
                 <form id="registerForm" onsubmit="handleRegister(event)">
@@ -552,7 +582,7 @@
         </div>
 
         <!-- 3. OTP ACCOUNT RECOVERY VIEW -->
-        <div id="viewOtp" class="hidden">
+        <div id="viewOtp" class="hidden" style="max-width: 400px; margin: 0 auto;">
             <div class="glass-neu-card">
                 <h2 class="card-title">OTP Account Recovery</h2>
                 
@@ -615,148 +645,162 @@
                     <div id="kpiEnrolled" class="kpi-val">0</div>
                     <div class="kpi-lbl">Enrolled</div>
                 </div>
-            </div>
-
-            <!-- ANNOUNCEMENT / NOTICE BOARD CARD -->
-            <div class="glass-neu-card">
-                <h3 class="card-title">Center Announcements 📢</h3>
-                <div id="announcementsList"></div>
-
-                <div id="announcementPostForm" class="hidden" style="margin-top:15px; border-top:1px solid rgba(0,0,0,0.08); padding-top:12px;">
-                    <div class="form-group">
-                        <label class="form-label">Notice Title</label>
-                        <input type="text" id="annTitle" class="neu-input" placeholder="e.g., PTA Meeting">
-                    </div>
-                    <div class="form-group">
-                        <label class="form-label">Notice Content</label>
-                        <textarea id="annContent" class="neu-input" style="height:60px; resize:none;" placeholder="Write message..."></textarea>
-                    </div>
-                    <button type="button" class="neu-btn neu-btn-primary" onclick="postAnnouncement()">POST ANNOUNCEMENT</button>
+                <div id="kpiUsersCard" class="kpi-card hidden">
+                    <div id="kpiUsers" class="kpi-val">0</div>
+                    <div class="kpi-lbl">Users</div>
                 </div>
             </div>
 
-            <!-- DAILY CLASS ACTIVITY JOURNAL / STREAM -->
-            <div class="glass-neu-card">
-                <h3 class="card-title">Class Activity Journal 🎨</h3>
-                <div id="activitiesList"></div>
+            <div class="web-grid-layout">
 
-                <div id="activityPostForm" class="hidden" style="margin-top:15px; border-top:1px solid rgba(0,0,0,0.08); padding-top:12px;">
-                    <div class="form-group">
-                        <label class="form-label">Activity Name</label>
-                        <input type="text" id="actTitle" class="neu-input" placeholder="e.g., Morning Storytelling & Painting">
+                <!-- ANNOUNCEMENT / NOTICE BOARD CARD -->
+                <div class="glass-neu-card">
+                    <h3 class="card-title">Center Announcements 📢</h3>
+                    <div id="announcementsList"></div>
+
+                    <div id="announcementPostForm" class="hidden" style="margin-top:15px; border-top:1px solid rgba(0,0,0,0.08); padding-top:12px;">
+                        <div class="form-group">
+                            <label class="form-label">Notice Title</label>
+                            <input type="text" id="annTitle" class="neu-input" placeholder="e.g., PTA Meeting">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Notice Content</label>
+                            <textarea id="annContent" class="neu-input" style="height:60px; resize:none;" placeholder="Write message..."></textarea>
+                        </div>
+                        <button type="button" class="neu-btn neu-btn-primary" onclick="postAnnouncement()">POST ANNOUNCEMENT</button>
                     </div>
-                    <div class="form-group">
-                        <label class="form-label">Activity Description</label>
-                        <textarea id="actContent" class="neu-input" style="height:55px; resize:none;" placeholder="Describe what the children learned..."></textarea>
-                    </div>
-                    <button type="button" class="neu-btn neu-btn-primary" onclick="postDailyActivity()">LOG CLASS ACTIVITY</button>
                 </div>
+
+                <!-- DAILY CLASS ACTIVITY JOURNAL / STREAM -->
+                <div class="glass-neu-card">
+                    <h3 class="card-title">Class Activity Journal 🎨</h3>
+                    <div id="activitiesList"></div>
+
+                    <div id="activityPostForm" class="hidden" style="margin-top:15px; border-top:1px solid rgba(0,0,0,0.08); padding-top:12px;">
+                        <div class="form-group">
+                            <label class="form-label">Activity Name</label>
+                            <input type="text" id="actTitle" class="neu-input" placeholder="e.g., Morning Storytelling & Painting">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Activity Description</label>
+                            <textarea id="actContent" class="neu-input" style="height:55px; resize:none;" placeholder="Describe what the children learned..."></textarea>
+                        </div>
+                        <button type="button" class="neu-btn neu-btn-primary" onclick="postDailyActivity()">LOG CLASS ACTIVITY</button>
+                    </div>
+                </div>
+
             </div>
 
-            <!-- PARENT MODULE -->
+            <!-- PARENT MODULE (MOBILE LAYOUT) -->
             <div id="moduleParent" class="hidden">
-                <!-- PARENT FEATURE 1: CHILD ATTENDANCE TRACKER -->
-                <div class="glass-neu-card">
-                    <h3 class="card-title">Child Attendance Record 📅</h3>
-                    <div id="parentAttendanceTracker"></div>
-                </div>
+                <div class="web-grid-layout">
+                    <!-- PARENT FEATURE 1: CHILD ATTENDANCE TRACKER -->
+                    <div class="glass-neu-card">
+                        <h3 class="card-title">Child Attendance Record 📅</h3>
+                        <div id="parentAttendanceTracker"></div>
+                    </div>
 
-                <!-- PARENT FEATURE 2: ENROLLMENT FORM -->
-                <div class="glass-neu-card">
-                    <h3 class="card-title">Enrollment Application</h3>
-                    <form id="enrollmentForm" onsubmit="handleEnrollmentSubmit(event)">
-                        <div class="form-group">
-                            <label class="form-label">Child First Name</label>
-                            <input type="text" id="childFirstName" class="neu-input" placeholder="Child's first name" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Child Last Name</label>
-                            <input type="text" id="childLastName" class="neu-input" placeholder="Child's last name" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Date of Birth</label>
-                            <input type="date" id="childDob" class="neu-input" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Gender</label>
-                            <select id="childGender" class="neu-input">
-                                <option value="Male">Male</option>
-                                <option value="Female">Female</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="neu-btn neu-btn-primary">SUBMIT APPLICATION</button>
-                    </form>
-                </div>
+                    <!-- PARENT FEATURE 2: ENROLLMENT FORM -->
+                    <div class="glass-neu-card">
+                        <h3 class="card-title">Enrollment Application</h3>
+                        <form id="enrollmentForm" onsubmit="handleEnrollmentSubmit(event)">
+                            <div class="form-group">
+                                <label class="form-label">Child First Name</label>
+                                <input type="text" id="childFirstName" class="neu-input" placeholder="Child's first name" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Child Last Name</label>
+                                <input type="text" id="childLastName" class="neu-input" placeholder="Child's last name" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Date of Birth</label>
+                                <input type="date" id="childDob" class="neu-input" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Gender</label>
+                                <select id="childGender" class="neu-input">
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="neu-btn neu-btn-primary">SUBMIT APPLICATION</button>
+                        </form>
+                    </div>
 
-                <div class="glass-neu-card">
-                    <h3 class="card-title">My Submitted Applications</h3>
-                    <div id="parentApplicationsList"></div>
-                </div>
+                    <div class="glass-neu-card">
+                        <h3 class="card-title">My Submitted Applications</h3>
+                        <div id="parentApplicationsList"></div>
+                    </div>
 
-                <!-- PARENT FEATURE 3: DIRECT INQUIRY MESSAGE BOX -->
-                <div class="glass-neu-card">
-                    <h3 class="card-title">Send Staff Inquiry ✉️</h3>
-                    <form onsubmit="handleSendInquiry(event)">
-                        <div class="form-group">
-                            <label class="form-label">Subject</label>
-                            <input type="text" id="inquirySubject" class="neu-input" placeholder="e.g., Absence Notice / Medical Request" required>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Message</label>
-                            <textarea id="inquiryMessage" class="neu-input" style="height:60px; resize:none;" placeholder="Write your message to staff..." required></textarea>
-                        </div>
-                        <button type="submit" class="neu-btn neu-btn-primary">SEND MESSAGE</button>
-                    </form>
+                    <!-- PARENT FEATURE 3: DIRECT INQUIRY MESSAGE BOX -->
+                    <div class="glass-neu-card">
+                        <h3 class="card-title">Send Staff Inquiry ✉️</h3>
+                        <form onsubmit="handleSendInquiry(event)">
+                            <div class="form-group">
+                                <label class="form-label">Subject</label>
+                                <input type="text" id="inquirySubject" class="neu-input" placeholder="e.g., Absence Notice / Medical Request" required>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Message</label>
+                                <textarea id="inquiryMessage" class="neu-input" style="height:60px; resize:none;" placeholder="Write your message to staff..." required></textarea>
+                            </div>
+                            <button type="submit" class="neu-btn neu-btn-primary">SEND MESSAGE</button>
+                        </form>
+                    </div>
                 </div>
             </div>
 
             <!-- STAFF & ADMIN TRANSACTION PIPELINE & ROSTER -->
             <div id="moduleStaff" class="hidden">
-                <!-- TEACHER/ADMIN FEATURE 1: DAILY ATTENDANCE MARKER -->
-                <div class="glass-neu-card">
-                    <h3 class="card-title">Mark Today's Attendance ⏱️</h3>
-                    <div id="attendanceMarkingList"></div>
-                </div>
+                <div class="web-grid-layout">
+                    <!-- TEACHER/ADMIN FEATURE 1: DAILY ATTENDANCE MARKER -->
+                    <div class="glass-neu-card">
+                        <h3 class="card-title">Mark Today's Attendance ⏱️</h3>
+                        <div id="attendanceMarkingList"></div>
+                    </div>
 
-                <div class="glass-neu-card">
-                    <h3 class="card-title">Enrollment Pipeline</h3>
-                    <div id="enrollmentsList"></div>
-                </div>
+                    <div class="glass-neu-card">
+                        <h3 class="card-title">Enrollment Pipeline</h3>
+                        <div id="enrollmentsList"></div>
+                    </div>
 
-                <div class="glass-neu-card">
-                    <h3 class="card-title">Official Enrolled Students 🎓</h3>
-                    <div id="studentsRosterList"></div>
-                </div>
+                    <div class="glass-neu-card">
+                        <h3 class="card-title">Official Enrolled Students 🎓</h3>
+                        <div id="studentsRosterList"></div>
+                    </div>
 
-                <!-- TEACHER/ADMIN FEATURE 2: PARENT INQUIRIES INBOX -->
-                <div class="glass-neu-card">
-                    <h3 class="card-title">Parent Inquiries Inbox 📬</h3>
-                    <div id="inquiriesInboxList"></div>
+                    <!-- TEACHER/ADMIN FEATURE 2: PARENT INQUIRIES INBOX -->
+                    <div class="glass-neu-card">
+                        <h3 class="card-title">Parent Inquiries Inbox 📬</h3>
+                        <div id="inquiriesInboxList"></div>
+                    </div>
                 </div>
             </div>
 
             <!-- ADMIN ONLY MODULE: USER MANAGEMENT & CSV REPORT EXPORTER -->
             <div id="moduleAdminLogs" class="hidden">
-                <!-- ADMIN FEATURE 1: CSV DATA EXPORTER -->
-                <div class="glass-neu-card">
-                    <h3 class="card-title">Export Official Data 📥</h3>
-                    <p style="font-size:0.75rem; color:#64748b; margin-bottom:12px;">Download current records as CSV spreadsheets:</p>
-                    <div style="display:flex; gap:8px;">
-                        <button class="sm-btn sm-review" onclick="exportDataToCSV('students')">Students CSV</button>
-                        <button class="sm-btn sm-approve" onclick="exportDataToCSV('enrollment_applications')">Applications CSV</button>
-                        <button class="sm-btn sm-decline" onclick="exportDataToCSV('log_trails')" style="background:var(--navy-blue);">Audit Logs CSV</button>
+                <div class="web-grid-layout">
+                    <!-- ADMIN FEATURE 1: CSV DATA EXPORTER -->
+                    <div class="glass-neu-card">
+                        <h3 class="card-title">Export Official Data 📥</h3>
+                        <p style="font-size:0.75rem; color:#64748b; margin-bottom:12px;">Download current records as CSV spreadsheets:</p>
+                        <div style="display:flex; gap:8px;">
+                            <button class="sm-btn sm-review" onclick="exportDataToCSV('students')">Students CSV</button>
+                            <button class="sm-btn sm-approve" onclick="exportDataToCSV('enrollment_applications')">Applications CSV</button>
+                            <button class="sm-btn sm-decline" onclick="exportDataToCSV('log_trails')" style="background:var(--navy-blue);">Audit Logs CSV</button>
+                        </div>
                     </div>
-                </div>
 
-                <!-- ADMIN FEATURE 2: REGISTERED USERS DIRECTORY (WITH EDIT & DELETE) -->
-                <div class="glass-neu-card">
-                    <h3 class="card-title">User Accounts Manager 👥</h3>
-                    <div id="usersDirectoryList"></div>
-                </div>
+                    <!-- ADMIN FEATURE 2: REGISTERED USERS DIRECTORY (WITH EDIT & DELETE) -->
+                    <div class="glass-neu-card">
+                        <h3 class="card-title">User Accounts Manager 👥</h3>
+                        <div id="usersDirectoryList"></div>
+                    </div>
 
-                <div class="glass-neu-card">
-                    <h3 class="card-title">System Log Trail</h3>
-                    <div id="logsList"></div>
+                    <div class="glass-neu-card">
+                        <h3 class="card-title">System Log Trail 🛡️</h3>
+                        <div id="logsList"></div>
+                    </div>
                 </div>
             </div>
 
@@ -1606,14 +1650,19 @@
         if (!currentUser || (currentUser.role_id != 1 && currentUser.role_id != 2)) return;
         const { data: apps } = await db.from('enrollment_applications').select('status');
         const { data: students } = await db.from('students').select('id');
+        const { data: users } = await db.from('users').select('id');
 
         let totalApps = apps ? apps.length : 0;
         let pendingApps = apps ? apps.filter(a => a.status === 'Pending Review' || a.status === 'Teacher Reviewed').length : 0;
         let totalEnrolled = students ? students.length : 0;
+        let totalUsers = users ? users.length : 0;
 
         document.getElementById('kpiApps').innerText = totalApps;
         document.getElementById('kpiPending').innerText = pendingApps;
         document.getElementById('kpiEnrolled').innerText = totalEnrolled;
+        if (document.getElementById('kpiUsers')) {
+            document.getElementById('kpiUsers').innerText = totalUsers;
+        }
     }
 
     async function fetchLogs() {
@@ -1640,6 +1689,8 @@
     // VIEW ROUTING
     function renderDashboard() {
         hideToast();
+        const appFrame = document.getElementById('appFrame');
+
         document.getElementById('viewLogin').classList.add('hidden');
         document.getElementById('viewRegister').classList.add('hidden');
         document.getElementById('viewOtp').classList.add('hidden');
@@ -1651,20 +1702,34 @@
         document.getElementById('dashRole').innerText = `Role: ${roleTitles[currentUser.role_id] || 'User'}`;
 
         document.getElementById('kpiGrid').classList.add('hidden');
+        document.getElementById('kpiUsersCard').classList.add('hidden');
         document.getElementById('moduleParent').classList.add('hidden');
         document.getElementById('moduleStaff').classList.add('hidden');
         document.getElementById('moduleAdminLogs').classList.add('hidden');
+
+        // DYNAMICALLY SWITCH CANVAS: ADMIN GETS WEBPAGE UI, TEACHERS & PARENTS GET MOBILE UI
+        if (currentUser.role_id == 1) {
+            appFrame.classList.add('admin-web-mode');
+            document.getElementById('portalHeaderTitle').innerText = "ST. BENEDICT DAYCARE CENTER";
+            document.getElementById('portalHeaderSubtitle').innerText = "System Administrator Web Management Portal";
+        } else {
+            appFrame.classList.remove('admin-web-mode');
+            document.getElementById('portalHeaderTitle').innerText = "ST. BENEDICT DAYCARE";
+            document.getElementById('portalHeaderSubtitle').innerText = "Mobile Educational Management";
+        }
 
         fetchAnnouncements();
         fetchDailyActivities();
 
         if (currentUser.role_id == 3) {
+            // PARENT ROLE (MOBILE UI)
             document.getElementById('moduleParent').classList.remove('hidden');
             document.getElementById('announcementPostForm').classList.add('hidden');
             document.getElementById('activityPostForm').classList.add('hidden');
             fetchParentApplications();
             fetchParentAttendanceTracker();
-        } else if (currentUser.role_id == 1 || currentUser.role_id == 2) {
+        } else if (currentUser.role_id == 2) {
+            // TEACHER ROLE (MOBILE UI)
             document.getElementById('kpiGrid').classList.remove('hidden');
             document.getElementById('moduleStaff').classList.remove('hidden');
             document.getElementById('announcementPostForm').classList.remove('hidden');
@@ -1674,12 +1739,21 @@
             fetchEnrollments();
             fetchStudentsRoster();
             fetchInquiriesInbox();
-
-            if (currentUser.role_id == 1) {
-                document.getElementById('moduleAdminLogs').classList.remove('hidden');
-                fetchUsersDirectory();
-                fetchLogs();
-            }
+        } else if (currentUser.role_id == 1) {
+            // ADMIN ROLE (WEBPAGE UI)
+            document.getElementById('kpiGrid').classList.remove('hidden');
+            document.getElementById('kpiUsersCard').classList.remove('hidden');
+            document.getElementById('moduleStaff').classList.remove('hidden');
+            document.getElementById('moduleAdminLogs').classList.remove('hidden');
+            document.getElementById('announcementPostForm').classList.remove('hidden');
+            document.getElementById('activityPostForm').classList.remove('hidden');
+            fetchKPIs();
+            fetchAttendanceMarkingList();
+            fetchEnrollments();
+            fetchStudentsRoster();
+            fetchInquiriesInbox();
+            fetchUsersDirectory();
+            fetchLogs();
         }
     }
 
@@ -1715,6 +1789,7 @@
         currentUser = null;
         sessionStorage.removeItem('educare_session_user');
         closeLogoutModal();
+        document.getElementById('appFrame').classList.remove('admin-web-mode');
         document.getElementById('viewDashboard').classList.add('hidden');
         document.getElementById('topLogoutBtn').classList.add('hidden');
         document.getElementById('viewLogin').classList.remove('hidden');
