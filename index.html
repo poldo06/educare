@@ -42,8 +42,9 @@
         .app-frame {
             width: 100%;
             max-width: 412px;
-            height: 100vh;
-            max-height: 870px;
+            height: min(94vh, 900px);
+            height: min(94dvh, 900px);
+            max-height: 900px;
             background-color: var(--neu-bg);
             border-radius: 40px;
             box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
@@ -55,10 +56,13 @@
             transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        @media (max-width: 450px) {
+        @media (max-width: 480px) {
             .app-frame {
+                max-width: 100%;
                 border-radius: 0;
-                max-height: 100vh;
+                height: 100vh;
+                height: 100dvh;
+                max-height: 100dvh;
                 border: none;
             }
         }
@@ -158,13 +162,26 @@
         /* SCROLLABLE CONTENT BODY */
         .app-body {
             flex: 1;
-            padding: 20px;
+            padding: 16px;
             overflow-y: auto;
+            overflow-x: hidden;
             position: relative;
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
         }
 
         .app-body::-webkit-scrollbar {
-            display: none;
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+            background: transparent !important;
+        }
+        
+        /* Modern icon action grid & tab pages */
+        .page-card-container {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
         }
 
         /* NEUMORPHIC + GLASS CARDS */
@@ -174,25 +191,73 @@
             -webkit-backdrop-filter: blur(16px);
             border: 1px solid var(--glass-border);
             border-radius: 24px;
-            padding: 22px;
+            padding: 18px 20px;
             box-shadow: 8px 8px 16px var(--neu-shadow-dark), -8px -8px 16px var(--neu-shadow-light);
-            margin-bottom: 20px;
+            margin-bottom: 14px;
             animation: cardSlideUp 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
         }
 
         @keyframes cardSlideUp {
-            from { opacity: 0; transform: translateY(22px) scale(0.98); }
+            from { opacity: 0; transform: translateY(16px) scale(0.98); }
             to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
         .card-title {
-            margin: 0 0 16px;
-            font-size: 0.98rem;
+            margin: 0 0 12px;
+            font-size: 0.95rem;
             color: var(--navy-blue);
             font-weight: 700;
             display: flex;
             align-items: center;
             justify-content: space-between;
+        }
+
+        /* CARD HEADER TOGGLE / ACTION BUTTON */
+        .card-header-btn {
+            background: rgba(15, 45, 92, 0.08);
+            border: 1px solid rgba(15, 45, 92, 0.16);
+            color: var(--navy-blue);
+            font-family: inherit;
+            font-size: 0.72rem;
+            font-weight: 600;
+            padding: 5px 12px;
+            border-radius: 10px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .card-header-btn:hover {
+            background: var(--forest-green);
+            color: #ffffff;
+            border-color: var(--forest-green);
+        }
+
+        .card-header-btn:active {
+            transform: scale(0.94);
+        }
+
+        /* COLLAPSIBLE ACCORDION FORM DRAWER */
+        .collapsible-form-drawer {
+            max-height: 0;
+            opacity: 0;
+            overflow: hidden;
+            transition: max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease, margin 0.3s ease, padding 0.3s ease;
+            margin-top: 0;
+            background: rgba(15, 45, 92, 0.03);
+            border-radius: 14px;
+            border: 1px dashed transparent;
+        }
+
+        .collapsible-form-drawer.open {
+            max-height: 380px;
+            opacity: 1;
+            margin-top: 12px;
+            border-color: rgba(15, 45, 92, 0.14);
+            padding: 12px;
         }
 
         /* RESPONSIVE GRID SYSTEM FOR ADMIN WEBPAGE MODE */
@@ -210,22 +275,38 @@
         .kpi-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        @media (max-width: 480px) {
+            .kpi-card {
+                padding: 6px 4px;
+                border-radius: 10px;
+            }
+            .kpi-val {
+                font-size: 0.95rem;
+            }
+            .kpi-lbl {
+                font-size: 0.58rem;
+            }
         }
 
         .admin-web-mode .kpi-grid {
             grid-template-columns: repeat(4, 1fr);
-            gap: 16px;
+            gap: 14px;
+            margin-bottom: 18px;
         }
 
         .kpi-card {
-            background: rgba(255, 255, 255, 0.7);
+            background: rgba(255, 255, 255, 0.72);
             border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 12px 8px;
+            border-radius: 14px;
+            padding: 8px 6px;
             text-align: center;
-            box-shadow: 3px 3px 6px var(--neu-shadow-dark), -3px -3px 6px var(--neu-shadow-light);
+            box-shadow: 2px 2px 5px var(--neu-shadow-dark), -2px -2px 5px var(--neu-shadow-light);
+            transition: transform 0.2s;
+        }
             transition: transform 0.2s;
         }
 
@@ -653,6 +734,132 @@
             height: 100%;
             border: 0;
         }
+    
+        /* ICON BOTTOM NAVIGATION BAR & TAB SYSTEM (NO-SCROLL UI) */
+        .app-bottom-nav {
+            background: rgba(15, 45, 92, 0.96);
+            scroll-snap-type: x proximity;
+            scroll-behavior: smooth;
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.16);
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -webkit-overflow-scrolling: touch;
+            padding: 8px 10px calc(8px + env(safe-area-inset-bottom, 0px));
+            position: relative;
+            z-index: 50;
+            box-shadow: 0 -8px 25px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+            gap: 6px;
+            flex-shrink: 0;
+        }
+
+        .app-bottom-nav::-webkit-scrollbar {
+            display: none;
+        }
+
+        .nav-tab-btn {
+            background: transparent;
+            border: none;
+            outline: none;
+            color: rgba(255, 255, 255, 0.65);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 6px 10px;
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+            font-family: inherit;
+            position: relative;
+            flex: 1 0 auto;
+            min-width: 62px;
+            max-width: 90px;
+            scroll-snap-align: center;
+        }
+
+        .nav-tab-btn:hover {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-tab-btn:active {
+            transform: scale(0.92);
+        }
+
+        .nav-tab-btn.active {
+            color: #ffffff;
+            background: rgba(255, 255, 255, 0.18);
+            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.25), 0 4px 12px rgba(0, 0, 0, 0.2);
+        }
+
+        .nav-tab-btn.active .nav-tab-icon {
+            transform: translateY(-2px) scale(1.12);
+            filter: drop-shadow(0 2px 6px rgba(212, 175, 55, 0.6));
+        }
+
+        .nav-tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: 3px;
+            width: 20px;
+            height: 3px;
+            background: var(--gold);
+            border-radius: 3px;
+            box-shadow: 0 0 10px var(--gold);
+        }
+
+        .nav-tab-icon {
+            font-size: 1.25rem;
+            line-height: 1;
+            margin-bottom: 3px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        .nav-tab-label {
+            font-size: 0.65rem;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+            white-space: nowrap;
+        }
+
+        /* ACTIVE TAB INDICATOR PILL */
+        .active-tab-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: rgba(15, 45, 92, 0.08);
+            border: 1px solid rgba(15, 45, 92, 0.12);
+            border-radius: 12px;
+            padding: 6px 14px;
+            margin-bottom: 12px;
+            font-size: 0.76rem;
+            font-weight: 600;
+            color: var(--navy-blue);
+        }
+
+        .tab-section-content {
+            display: block;
+            animation: tabFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .tab-section-content.tab-hidden {
+            display: none !important;
+        }
+
+        @keyframes tabFadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
     </style>
 </head>
 <body>
@@ -865,45 +1072,70 @@
                 </div>
             </div>
 
+            <!-- ACTIVE SECTION INDICATOR BANNER (INSTANT CLARITY) -->
+            <div class="active-tab-banner">
+                <span>📍 <span id="activeTabIndicatorPill">Center Announcements</span></span>
+                <span id="tabRoleTag" style="font-size:0.68rem; color:#64748b; font-weight:500;">Overview</span>
+            </div>
+
             <div class="web-grid-layout">
 
-                <!-- ANNOUNCEMENT / NOTICE BOARD CARD -->
+            <!-- PAGE 1: CENTER ANNOUNCEMENTS ONLY (FIT TO SCREEN) -->
+            <div id="pageAnnouncements" class="tab-section-content">
                 <div class="glass-neu-card">
-                    <h3 class="card-title">Center Announcements 📢</h3>
-                    <div id="announcementsList"></div>
-
-                    <div id="announcementPostForm" class="hidden" style="margin-top:15px; border-top:1px solid rgba(0,0,0,0.08); padding-top:12px;">
-                        <div class="form-group">
-                            <label class="form-label">Notice Title</label>
-                            <input type="text" id="annTitle" class="neu-input" placeholder="e.g., PTA Meeting">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Notice Content</label>
-                            <textarea id="annContent" class="neu-input" style="height:60px; resize:none;" placeholder="Write message..."></textarea>
-                        </div>
-                        <button type="button" class="neu-btn neu-btn-primary" onclick="postAnnouncement()">POST ANNOUNCEMENT</button>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <h3 class="card-title" style="margin:0;">Announcements 📢</h3>
+                        <button type="button" id="toggleAnnFormBtn" class="card-header-btn hidden" onclick="toggleAnnouncementDrawer()">➕ New Notice</button>
                     </div>
+
+                    <div id="announcementPostDrawer" class="collapsible-form-drawer">
+                        <div class="form-group" style="margin-bottom:8px;">
+                            <label class="form-label">Notice Title</label>
+                            <input type="text" id="annTitle" class="neu-input" placeholder="e.g., PTA Meeting / Holiday">
+                        </div>
+                        <div class="form-group" style="margin-bottom:8px;">
+                            <label class="form-label">Notice Content</label>
+                            <textarea id="annContent" class="neu-input" style="height:55px; resize:none;" placeholder="Write notice details..."></textarea>
+                        </div>
+                        <div style="display:flex; gap:8px;">
+                            <button type="button" class="neu-btn" onclick="toggleAnnouncementDrawer(false)" style="flex:1; padding:8px; font-size:0.75rem;">Cancel</button>
+                            <button type="button" class="neu-btn neu-btn-primary" onclick="postAnnouncement()" style="flex:2; padding:8px; font-size:0.75rem;">POST NOTICE</button>
+                        </div>
+                    </div>
+
+                    <div id="announcementsList" style="max-height: 320px; overflow-y: auto; scrollbar-width: none; margin-top:6px;"></div>
                 </div>
+            </div>
 
-                <!-- DAILY CLASS ACTIVITY JOURNAL / STREAM -->
+            <!-- PAGE: DAILY CLASS ACTIVITY JOURNAL (FIT TO SCREEN) -->
+            <div id="pageActivities" class="tab-section-content tab-hidden">
                 <div class="glass-neu-card">
-                    <h3 class="card-title">Class Activity Journal 🎨</h3>
-                    <div id="activitiesList"></div>
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                        <h3 class="card-title" style="margin:0;">Class Activity Journal 🎨</h3>
+                        <button type="button" id="toggleActFormBtn" class="card-header-btn hidden" onclick="toggleActivityDrawer()">➕ Log Activity</button>
+                    </div>
 
-                    <div id="activityPostForm" class="hidden" style="margin-top:15px; border-top:1px solid rgba(0,0,0,0.08); padding-top:12px;">
-                        <div class="form-group">
+                    <div id="activityPostDrawer" class="collapsible-form-drawer">
+                        <div class="form-group" style="margin-bottom:8px;">
                             <label class="form-label">Activity Name</label>
                             <input type="text" id="actTitle" class="neu-input" placeholder="e.g., Morning Storytelling & Painting">
                         </div>
-                        <div class="form-group">
+                        <div class="form-group" style="margin-bottom:8px;">
                             <label class="form-label">Activity Description</label>
                             <textarea id="actContent" class="neu-input" style="height:55px; resize:none;" placeholder="Describe what the children learned..."></textarea>
                         </div>
-                        <button type="button" class="neu-btn neu-btn-primary" onclick="postDailyActivity()">LOG CLASS ACTIVITY</button>
+                        <div style="display:flex; gap:8px;">
+                            <button type="button" class="neu-btn" onclick="toggleActivityDrawer(false)" style="flex:1; padding:8px; font-size:0.75rem;">Cancel</button>
+                            <button type="button" class="neu-btn neu-btn-primary" onclick="postDailyActivity()" style="flex:2; padding:8px; font-size:0.75rem;">LOG ACTIVITY</button>
+                        </div>
                     </div>
-                </div>
 
-                <!-- LEARNING MODULES & VIDEO LESSONS (TEACHER, ADMIN & PARENT) -->
+                    <div id="activitiesList" style="max-height: 320px; overflow-y: auto; scrollbar-width: none; margin-top:6px;"></div>
+                </div>
+            </div>
+
+            <!-- PAGE 2: LEARNING LESSON MODULES -->
+            <div id="pageLessons" class="tab-section-content tab-hidden">
                 <div class="glass-neu-card">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
                         <h3 class="card-title" style="margin:0;">Daycare Learning Modules 📚</h3>
@@ -912,53 +1144,60 @@
                     <p style="font-size:0.75rem; color:#64748b; margin-top:-6px; margin-bottom:14px;">
                         Interactive daycare educational lessons, alphabet learning, songs, and subject video modules provided by teachers.
                     </p>
-                    <div id="lessonsList"></div>
+                    <div id="lessonsList" style="max-height: 380px; overflow-y: auto; scrollbar-width: none;"></div>
                 </div>
+            </div>
 
             </div>
 
-            <!-- PARENT MODULE (MOBILE LAYOUT) -->
+            <!-- PARENT MODULE PAGES -->
             <div id="moduleParent" class="hidden">
-                <div class="web-grid-layout">
-                    <!-- PARENT FEATURE 1: CHILD ATTENDANCE TRACKER -->
+                <!-- PAGE: PARENT ATTENDANCE -->
+                <div id="pageParentAttendance" class="tab-section-content tab-hidden">
                     <div class="glass-neu-card">
                         <h3 class="card-title">Child Attendance Record 📅</h3>
                         <div id="parentAttendanceTracker"></div>
                     </div>
+                </div>
 
-                    <!-- PARENT FEATURE 2: ENROLLMENT FORM -->
-                    <div class="glass-neu-card">
-                        <h3 class="card-title">Enrollment Application</h3>
-                        <form id="enrollmentForm" onsubmit="handleEnrollmentSubmit(event)">
-                            <div class="form-group">
-                                <label class="form-label">Child First Name</label>
-                                <input type="text" id="childFirstName" class="neu-input" placeholder="Child's first name" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Child Last Name</label>
-                                <input type="text" id="childLastName" class="neu-input" placeholder="Child's last name" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Date of Birth</label>
-                                <input type="date" id="childDob" class="neu-input" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Gender</label>
-                                <select id="childGender" class="neu-input">
-                                    <option value="Male">Male</option>
-                                    <option value="Female">Female</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="neu-btn neu-btn-primary">SUBMIT APPLICATION</button>
-                        </form>
+                <!-- PAGE: PARENT ENROLLMENT -->
+                <div id="pageParentEnrollment" class="tab-section-content tab-hidden">
+                    <div class="web-grid-layout">
+                        <div class="glass-neu-card">
+                            <h3 class="card-title">Enrollment Application 📝</h3>
+                            <form id="enrollmentForm" onsubmit="handleEnrollmentSubmit(event)">
+                                <div class="form-group">
+                                    <label class="form-label">Child First Name</label>
+                                    <input type="text" id="childFirstName" class="neu-input" placeholder="Child's first name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Child Last Name</label>
+                                    <input type="text" id="childLastName" class="neu-input" placeholder="Child's last name" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Date of Birth</label>
+                                    <input type="date" id="childDob" class="neu-input" required>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Gender</label>
+                                    <select id="childGender" class="neu-input">
+                                        <option value="Male">Male</option>
+                                        <option value="Female">Female</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="neu-btn neu-btn-primary">SUBMIT APPLICATION</button>
+                            </form>
+                        </div>
+
+                        <div class="glass-neu-card">
+                            <h3 class="card-title">My Submitted Applications</h3>
+                            <div id="parentApplicationsList"></div>
+                        </div>
                     </div>
+                </div>
 
-                    <div class="glass-neu-card">
-                        <h3 class="card-title">My Submitted Applications</h3>
-                        <div id="parentApplicationsList"></div>
-                    </div>
-
-                    <!-- PARENT FEATURE 3: DIRECT INQUIRY MESSAGE BOX -->
+                <!-- PAGE: PARENT INQUIRIES -->
+                <div id="pageParentInquiry" class="tab-section-content tab-hidden">
                     <div class="glass-neu-card">
                         <h3 class="card-title">Send Staff Inquiry ✉️</h3>
                         <form onsubmit="handleSendInquiry(event)">
@@ -976,26 +1215,34 @@
                 </div>
             </div>
 
-            <!-- STAFF & ADMIN TRANSACTION PIPELINE & ROSTER -->
+            <!-- STAFF MODULE PAGES -->
             <div id="moduleStaff" class="hidden">
-                <div class="web-grid-layout">
-                    <!-- TEACHER/ADMIN FEATURE 1: DAILY ATTENDANCE MARKER -->
+                <!-- PAGE: STAFF ATTENDANCE MARKING -->
+                <div id="pageStaffAttendance" class="tab-section-content tab-hidden">
                     <div class="glass-neu-card">
                         <h3 class="card-title">Mark Today's Attendance ⏱️</h3>
                         <div id="attendanceMarkingList"></div>
                     </div>
+                </div>
 
+                <!-- PAGE: STAFF ENROLLMENTS PIPELINE -->
+                <div id="pageStaffPipeline" class="tab-section-content tab-hidden">
                     <div class="glass-neu-card">
-                        <h3 class="card-title">Enrollment Pipeline</h3>
-                        <div id="enrollmentsList"></div>
+                        <h3 class="card-title">Enrollment Pipeline 📋</h3>
+                        <div id="enrollmentsList" style="max-height: 380px; overflow-y: auto; scrollbar-width: none;"></div>
                     </div>
+                </div>
 
+                <!-- PAGE: OFFICIAL ENROLLED STUDENTS ROSTER -->
+                <div id="pageStaffRoster" class="tab-section-content tab-hidden">
                     <div class="glass-neu-card">
                         <h3 class="card-title">Official Enrolled Students 🎓</h3>
-                        <div id="studentsRosterList"></div>
+                        <div id="studentsRosterList" style="max-height: 380px; overflow-y: auto; scrollbar-width: none;"></div>
                     </div>
+                </div>
 
-                    <!-- TEACHER/ADMIN FEATURE 2: PARENT INQUIRIES INBOX -->
+                <!-- PAGE: STAFF INQUIRIES INBOX -->
+                <div id="pageStaffInquiries" class="tab-section-content tab-hidden">
                     <div class="glass-neu-card">
                         <h3 class="card-title">Parent Inquiries Inbox 📬</h3>
                         <div id="inquiriesInboxList"></div>
@@ -1003,80 +1250,93 @@
                 </div>
             </div>
 
-            <!-- ADMIN ONLY MODULE: USER MANAGEMENT & CSV REPORT EXPORTER -->
+                        <!-- ADMIN ONLY MODULE: USER MANAGEMENT & AUDIT LOGS TAB -->
             <div id="moduleAdminLogs" class="hidden">
-                <div class="web-grid-layout">
-                    <!-- ADMIN FEATURE 1: CSV DATA EXPORTER -->
-                    <div class="glass-neu-card">
-                        <h3 class="card-title">Export Official Data 📥</h3>
-                        <p style="font-size:0.75rem; color:#64748b; margin-bottom:12px;">Download current records as CSV spreadsheets:</p>
-                        <div style="display:flex; gap:8px;">
-                            <button class="sm-btn sm-review" onclick="exportDataToCSV('students')">Students CSV</button>
-                            <button class="sm-btn sm-approve" onclick="exportDataToCSV('enrollment_applications')">Applications CSV</button>
-                            <button class="sm-btn sm-decline" onclick="exportDataToCSV('log_trails')" style="background:var(--navy-blue);">Audit Logs CSV</button>
+                <!-- ADMIN USERS & CSV TAB -->
+                <div id="tabAdminUsers" class="tab-section-content tab-hidden">
+                    <div class="web-grid-layout">
+                        <!-- ADMIN FEATURE 2: REGISTERED USERS DIRECTORY (WITH EDIT & DELETE) -->
+                        <div class="glass-neu-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                                <h3 class="card-title" style="margin:0;">User Accounts Manager 👥</h3>
+                                <button type="button" class="sm-btn sm-approve" onclick="openCreateUserModal()">➕ Add User</button>
+                            </div>
+                            <div style="margin-bottom:12px;">
+                                <input type="text" id="userSearchInput" class="neu-input" placeholder="🔍 Search users by name, username, or email..." oninput="filterUsersDirectory()">
+                            </div>
+                            <div id="usersDirectoryList"></div>
+                        </div>
+
+                        <!-- ADMIN FEATURE 1: CSV DATA EXPORTER -->
+                        <div class="glass-neu-card">
+                            <h3 class="card-title">Export Official Data 📥</h3>
+                            <p style="font-size:0.75rem; color:#64748b; margin-bottom:12px;">Download current records as CSV spreadsheets:</p>
+                            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                <button class="sm-btn sm-review" onclick="exportDataToCSV('students')">Students CSV</button>
+                                <button class="sm-btn sm-approve" onclick="exportDataToCSV('enrollment_applications')">Applications CSV</button>
+                                <button class="sm-btn sm-decline" onclick="exportDataToCSV('log_trails')" style="background:var(--navy-blue);">Audit Logs CSV</button>
+                            </div>
                         </div>
                     </div>
+                </div>
 
-                    <!-- ADMIN FEATURE 2: REGISTERED USERS DIRECTORY (WITH EDIT & DELETE) -->
-                    <div class="glass-neu-card">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
-                            <h3 class="card-title" style="margin:0;">User Accounts Manager 👥</h3>
-                            <button type="button" class="sm-btn sm-approve" onclick="openCreateUserModal()">➕ Add User</button>
+                <!-- ADMIN LOG TRAILS & BACKUP TAB -->
+                <div id="tabAdminSystem" class="tab-section-content tab-hidden">
+                    <div class="web-grid-layout">
+                        <!-- AUDIT LOGS -->
+                        <div class="glass-neu-card">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+                                <h3 class="card-title" style="margin:0;">System Log Trail 🛡️</h3>
+                                <button type="button" class="sm-btn" onclick="resetLogFilters()" style="background:#64748b; color:#fff;">Reset Filters</button>
+                            </div>
+                            <div class="filter-bar">
+                                <input type="date" id="logFilterDate" class="filter-select" onchange="filterLogTrail()" title="Filter by date">
+                                <select id="logFilterUser" class="filter-select" onchange="filterLogTrail()">
+                                    <option value="">All Users</option>
+                                </select>
+                                <select id="logFilterModule" class="filter-select" onchange="filterLogTrail()">
+                                    <option value="">All Modules</option>
+                                    <option value="AUTH">Authentication</option>
+                                    <option value="SECURITY">Security / OTP</option>
+                                    <option value="USER_MGMT">User Management</option>
+                                    <option value="ENROLLMENT">Enrollment</option>
+                                    <option value="ATTENDANCE">Attendance</option>
+                                    <option value="BACKUP">Backup & Recovery</option>
+                                    <option value="SYSTEM">System</option>
+                                </select>
+                                <select id="logFilterResult" class="filter-select" onchange="filterLogTrail()">
+                                    <option value="">All Results</option>
+                                    <option value="SUCCESS">Success</option>
+                                    <option value="FAILED">Failed</option>
+                                    <option value="BLOCKED">Blocked</option>
+                                </select>
+                            </div>
+                            <div id="logsList"></div>
                         </div>
-                        <div style="margin-bottom:12px;">
-                            <input type="text" id="userSearchInput" class="neu-input" placeholder="🔍 Search users by name, username, or email..." oninput="filterUsersDirectory()">
-                        </div>
-                        <div id="usersDirectoryList"></div>
-                    </div>
 
-                    <div class="glass-neu-card">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; flex-wrap:wrap; gap:8px;">
-                            <h3 class="card-title" style="margin:0;">System Log Trail 🛡️</h3>
-                            <button type="button" class="sm-btn" onclick="resetLogFilters()" style="background:#64748b; color:#fff;">Reset Filters</button>
+                        <!-- ADMIN FEATURE 3: DATABASE BACKUP & RESTORE -->
+                        <div class="glass-neu-card">
+                            <h3 class="card-title">Database Backup & Recovery 💾</h3>
+                            <p style="font-size:0.75rem; color:#64748b; margin-bottom:12px;">One-click JSON database snapshot and instant restoration:</p>
+                            <div style="display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap;">
+                                <button type="button" class="sm-btn sm-approve" onclick="createSystemBackup()">🔄 Create & Download Backup</button>
+                                <label class="sm-btn sm-review" style="cursor:pointer; display:inline-flex; align-items:center;">
+                                    📥 Restore From Backup
+                                    <input type="file" id="backupFileInput" accept=".json" onchange="handleBackupRestore(event)" style="display:none;">
+                                </label>
+                            </div>
+                            <div id="backupHistoryList" style="font-size:0.75rem; color:#475569;"></div>
                         </div>
-                        <div class="filter-bar">
-                            <input type="date" id="logFilterDate" class="filter-select" onchange="filterLogTrail()" title="Filter by date">
-                            <select id="logFilterUser" class="filter-select" onchange="filterLogTrail()">
-                                <option value="">All Users</option>
-                            </select>
-                            <select id="logFilterModule" class="filter-select" onchange="filterLogTrail()">
-                                <option value="">All Modules</option>
-                                <option value="AUTH">Authentication</option>
-                                <option value="SECURITY">Security / OTP</option>
-                                <option value="USER_MGMT">User Management</option>
-                                <option value="ENROLLMENT">Enrollment</option>
-                                <option value="ATTENDANCE">Attendance</option>
-                                <option value="BACKUP">Backup & Recovery</option>
-                                <option value="SYSTEM">System</option>
-                            </select>
-                            <select id="logFilterResult" class="filter-select" onchange="filterLogTrail()">
-                                <option value="">All Results</option>
-                                <option value="SUCCESS">SUCCESS</option>
-                                <option value="FAILED">FAILED</option>
-                                <option value="BLOCKED">BLOCKED</option>
-                            </select>
-                        </div>
-                        <div id="logsList"></div>
-                    </div>
-
-                    <!-- ADMIN FEATURE 3: DATABASE BACKUP & RESTORE -->
-                    <div class="glass-neu-card">
-                        <h3 class="card-title">Database Backup & Recovery 💾</h3>
-                        <p style="font-size:0.75rem; color:#64748b; margin-bottom:12px;">One-click JSON database snapshot and instant restoration:</p>
-                        <div style="display:flex; gap:10px; margin-bottom:14px; flex-wrap:wrap;">
-                            <button type="button" class="sm-btn sm-approve" onclick="createSystemBackup()">⚡ Create & Download Backup</button>
-                            <label class="sm-btn sm-review" style="cursor:pointer; display:inline-flex; align-items:center;">
-                                📥 Restore From Backup
-                                <input type="file" id="backupFileInput" accept=".json" onchange="handleBackupRestore(event)" style="display:none;">
-                            </label>
-                        </div>
-                        <div id="backupHistoryList" style="font-size:0.75rem; color:#475569;"></div>
                     </div>
                 </div>
             </div>
 
         </div>
 
+        <!-- BOTTOM ICON NAVIGATION BAR (INSTANT SWITCHING, NO SCROLL REQUIRED) -->
+        <nav id="appBottomNav" class="app-bottom-nav hidden">
+            <!-- Dynamic bottom tab bar icons rendered based on role -->
+        </nav>
     </div>
 
     <!-- LOGOUT MODAL -->
@@ -1118,8 +1378,6 @@
             </div>
         </div>
     </div>
-
-</div>
 
     <!-- INACTIVITY AUTO-LOGOUT WARNING MODAL -->
     <div id="inactivityWarningModal" class="modal-mask hidden">
@@ -1553,6 +1811,8 @@
         document.getElementById('viewDashboard').classList.add('hidden');
         document.getElementById('topLogoutBtn').classList.add('hidden');
         document.getElementById('topAccountBtn').classList.add('hidden');
+        const navEl = document.getElementById('appBottomNav');
+        if (navEl) navEl.classList.add('hidden');
         document.getElementById('viewLogin').classList.remove('hidden');
         showToast("Session terminated (logged out from another tab).", "warning");
     }
@@ -2444,6 +2704,22 @@
         });
     }
 
+    function toggleAnnouncementDrawer(forcedState) {
+        const drawer = document.getElementById('announcementPostDrawer');
+        const btn = document.getElementById('toggleAnnFormBtn');
+        if (!drawer) return;
+        const isOpen = forcedState !== undefined ? forcedState : !drawer.classList.contains('open');
+        if (isOpen) {
+            drawer.classList.add('open');
+            if (btn) btn.innerHTML = '✕ Close';
+            const titleInput = document.getElementById('annTitle');
+            if (titleInput) setTimeout(() => titleInput.focus(), 150);
+        } else {
+            drawer.classList.remove('open');
+            if (btn) btn.innerHTML = '➕ New Notice';
+        }
+    }
+
     async function postAnnouncement() {
         const title = document.getElementById('annTitle').value.trim();
         const content = document.getElementById('annContent').value.trim();
@@ -2463,10 +2739,27 @@
         showToast("Announcement published!", "success");
         document.getElementById('annTitle').value = '';
         document.getElementById('annContent').value = '';
+        toggleAnnouncementDrawer(false);
         fetchAnnouncements();
     }
 
     // DAILY CLASS ACTIVITY JOURNAL MODULE
+    function toggleActivityDrawer(forcedState) {
+        const drawer = document.getElementById('activityPostDrawer');
+        const btn = document.getElementById('toggleActFormBtn');
+        if (!drawer) return;
+        const isOpen = forcedState !== undefined ? forcedState : !drawer.classList.contains('open');
+        if (isOpen) {
+            drawer.classList.add('open');
+            if (btn) btn.innerHTML = '✕ Close';
+            const actInput = document.getElementById('actTitle');
+            if (actInput) setTimeout(() => actInput.focus(), 150);
+        } else {
+            drawer.classList.remove('open');
+            if (btn) btn.innerHTML = '➕ Log Activity';
+        }
+    }
+
     async function fetchDailyActivities() {
         const { data: list } = await db.from('daily_activities').select('*').order('created_at', { ascending: false }).limit(4);
         const container = document.getElementById('activitiesList');
@@ -2509,6 +2802,7 @@
         showToast("Class activity logged successfully!", "success");
         document.getElementById('actTitle').value = '';
         document.getElementById('actContent').value = '';
+        toggleActivityDrawer(false);
         fetchDailyActivities();
     }
 
@@ -3438,6 +3732,154 @@
 
 
     // VIEW ROUTING
+    
+    // TAB NAVIGATION CONTROLLER (INSTANT SWITCHING, NO-SCROLL SYSTEM)
+    let currentActiveTab = 'notices';
+
+    const ROLE_TABS = {
+        // Parent Tabs: One Single Screen Per Icon
+        3: [
+            { id: 'notices', label: 'Notices', icon: '📢', title: 'Center Announcements', sectionId: 'pageAnnouncements' },
+            { id: 'journal', label: 'Journal', icon: '🎨', title: 'Daily Class Journal', sectionId: 'pageActivities' },
+            { id: 'lessons', label: 'Lessons', icon: '📚', title: 'Video Learning Modules', sectionId: 'pageLessons' },
+            { id: 'attendance', label: 'Attend', icon: '📅', title: 'Child Attendance Tracker', sectionId: 'pageParentAttendance' },
+            { id: 'enroll', label: 'Enroll', icon: '📝', title: 'Enrollment Applications', sectionId: 'pageParentEnrollment' },
+            { id: 'inbox', label: 'Messages', icon: '✉️', title: 'Staff Inquiries Messenger', sectionId: 'pageParentInquiry' }
+        ],
+        // Teacher Tabs: One Single Screen Per Icon
+        2: [
+            { id: 'notices', label: 'Notices', icon: '📢', title: 'Center Announcements', sectionId: 'pageAnnouncements' },
+            { id: 'journal', label: 'Journal', icon: '🎨', title: 'Daily Class Journal', sectionId: 'pageActivities' },
+            { id: 'lessons', label: 'Lessons', icon: '📚', title: 'Learning Video Modules', sectionId: 'pageLessons' },
+            { id: 'marking', label: 'Marking', icon: '⏱️', title: 'Daily Attendance Marker', sectionId: 'pageStaffAttendance' },
+            { id: 'pipeline', label: 'Pipeline', icon: '📋', title: 'Enrollment Applications', sectionId: 'pageStaffPipeline' },
+            { id: 'roster', label: 'Students', icon: '🎓', title: 'Official Enrolled Students', sectionId: 'pageStaffRoster' },
+            { id: 'inbox', label: 'Inbox', icon: '📬', title: 'Parent Inquiries Inbox', sectionId: 'pageStaffInquiries' }
+        ],
+        // Administrator Tabs: One Single Screen Per Icon
+        1: [
+            { id: 'notices', label: 'Notices', icon: '📢', title: 'Center Announcements', sectionId: 'pageAnnouncements' },
+            { id: 'journal', label: 'Journal', icon: '🎨', title: 'Class Activity Stream', sectionId: 'pageActivities' },
+            { id: 'lessons', label: 'Lessons', icon: '📚', title: 'Learning Curriculum', sectionId: 'pageLessons' },
+            { id: 'marking', label: 'Attendance', icon: '⏱️', title: 'Attendance Marking', sectionId: 'pageStaffAttendance' },
+            { id: 'pipeline', label: 'Pipeline', icon: '📋', title: 'Enrollment Applications', sectionId: 'pageStaffPipeline' },
+            { id: 'roster', label: 'Students', icon: '🎓', title: 'Official Enrolled Students', sectionId: 'pageStaffRoster' },
+            { id: 'inbox', label: 'Inbox', icon: '📬', title: 'Parent Messages Inbox', sectionId: 'pageStaffInquiries' },
+            { id: 'users', label: 'Users', icon: '👥', title: 'User Accounts Directory', sectionId: 'tabAdminUsers' },
+            { id: 'system', label: 'System', icon: '🛡️', title: 'Security Trail & Backups', sectionId: 'tabAdminSystem' }
+        ]
+    };
+
+    function updateBottomNavigation() {
+        const navContainer = document.getElementById('appBottomNav');
+        if (!navContainer || !currentUser) return;
+
+        const tabs = ROLE_TABS[currentUser.role_id] || ROLE_TABS[3];
+        navContainer.innerHTML = '';
+        navContainer.classList.remove('hidden');
+
+        tabs.forEach((tab) => {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'nav-tab-btn ' + (currentActiveTab === tab.id ? 'active' : '');
+            btn.onclick = () => switchTab(tab.id);
+            btn.innerHTML = `
+                <span class="nav-tab-icon">${tab.icon}</span>
+                <span class="nav-tab-label">${tab.label}</span>
+            `;
+            navContainer.appendChild(btn);
+        });
+
+        // Ensure current active tab is valid for this role
+        const tabExists = tabs.some(t => t.id === currentActiveTab);
+        if (!tabExists) {
+            currentActiveTab = tabs[0].id;
+        }
+
+        applyTabVisibility();
+        setTimeout(() => {
+            const activeBtn = navContainer.querySelector('.nav-tab-btn.active');
+            if (activeBtn) {
+                try { activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); } catch(e) {}
+            }
+        }, 50);
+    }
+
+    function switchTab(tabId) {
+        currentActiveTab = tabId;
+        const sound = soundEnabled;
+        if (sound) playChimeSound();
+
+        // Update nav bar active state
+        const navContainer = document.getElementById('appBottomNav');
+        if (navContainer) {
+            const tabs = ROLE_TABS[currentUser?.role_id] || ROLE_TABS[3];
+            const buttons = navContainer.querySelectorAll('.nav-tab-btn');
+            tabs.forEach((tab, idx) => {
+                if (buttons[idx]) {
+                    if (tab.id === tabId) {
+                        buttons[idx].classList.add('active');
+                        try { buttons[idx].scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); } catch(e) {}
+                    } else {
+                        buttons[idx].classList.remove('active');
+                    }
+                }
+            });
+        }
+
+        applyTabVisibility();
+
+        // Scroll container to top smoothly so new tab content is immediately visible
+        const appBody = document.querySelector('.app-body');
+        if (appBody) appBody.scrollTop = 0;
+    }
+
+    function applyTabVisibility() {
+        if (!currentUser) return;
+        const tabs = ROLE_TABS[currentUser.role_id] || ROLE_TABS[3];
+        const activeDef = tabs.find(t => t.id === currentActiveTab) || tabs[0];
+
+        // Update indicator pill
+        const pill = document.getElementById('activeTabIndicatorPill');
+        if (pill) {
+            pill.innerText = activeDef ? activeDef.title : 'Home';
+        }
+        const roleTag = document.getElementById('tabRoleTag');
+        if (roleTag) {
+            const roleLabels = { 1: 'Admin View', 2: 'Teacher View', 3: 'Parent View' };
+            roleTag.innerText = roleLabels[currentUser.role_id] || 'Overview';
+        }
+
+        // Hide all section content containers first
+        const allSections = [
+            'pageAnnouncements',
+            'pageActivities',
+            'pageLessons',
+            'pageParentAttendance',
+            'pageParentEnrollment',
+            'pageParentInquiry',
+            'pageStaffAttendance',
+            'pageStaffPipeline',
+            'pageStaffRoster',
+            'pageStaffInquiries',
+            'tabAdminUsers',
+            'tabAdminSystem'
+        ];
+
+        allSections.forEach(secId => {
+            const el = document.getElementById(secId);
+            if (el) el.classList.add('tab-hidden');
+        });
+
+        // Show the active tab container
+        if (activeDef && activeDef.sectionId) {
+            const activeEl = document.getElementById(activeDef.sectionId);
+            if (activeEl) {
+                activeEl.classList.remove('tab-hidden');
+            }
+        }
+    }
+
     function renderDashboard() {
         try { history.pushState(null, '', location.href); } catch(e) {}
         hideToast();
@@ -3476,22 +3918,26 @@
         fetchLessons();
 
         const addLessonBtn = document.getElementById('openAddLessonBtn');
+        const toggleAnnBtn = document.getElementById('toggleAnnFormBtn');
+        const toggleActBtn = document.getElementById('toggleActFormBtn');
 
         if (currentUser.role_id == 3) {
             // PARENT ROLE (MOBILE UI)
             if (addLessonBtn) addLessonBtn.classList.add('hidden');
+            if (toggleAnnBtn) toggleAnnBtn.classList.add('hidden');
+            if (toggleActBtn) toggleActBtn.classList.add('hidden');
+            toggleAnnouncementDrawer(false);
+            toggleActivityDrawer(false);
             document.getElementById('moduleParent').classList.remove('hidden');
-            document.getElementById('announcementPostForm').classList.add('hidden');
-            document.getElementById('activityPostForm').classList.add('hidden');
             fetchParentApplications();
             fetchParentAttendanceTracker();
         } else if (currentUser.role_id == 2) {
             // TEACHER ROLE (MOBILE UI)
             if (addLessonBtn) addLessonBtn.classList.remove('hidden');
+            if (toggleAnnBtn) toggleAnnBtn.classList.remove('hidden');
+            if (toggleActBtn) toggleActBtn.classList.remove('hidden');
             document.getElementById('kpiGrid').classList.remove('hidden');
             document.getElementById('moduleStaff').classList.remove('hidden');
-            document.getElementById('announcementPostForm').classList.remove('hidden');
-            document.getElementById('activityPostForm').classList.remove('hidden');
             fetchKPIs();
             fetchAttendanceMarkingList();
             fetchEnrollments();
@@ -3500,12 +3946,12 @@
         } else if (currentUser.role_id == 1) {
             // ADMIN ROLE (WEBPAGE UI)
             if (addLessonBtn) addLessonBtn.classList.remove('hidden');
+            if (toggleAnnBtn) toggleAnnBtn.classList.remove('hidden');
+            if (toggleActBtn) toggleActBtn.classList.remove('hidden');
             document.getElementById('kpiGrid').classList.remove('hidden');
             document.getElementById('kpiUsersCard').classList.remove('hidden');
             document.getElementById('moduleStaff').classList.remove('hidden');
             document.getElementById('moduleAdminLogs').classList.remove('hidden');
-            document.getElementById('announcementPostForm').classList.remove('hidden');
-            document.getElementById('activityPostForm').classList.remove('hidden');
             fetchKPIs();
             fetchAttendanceMarkingList();
             fetchEnrollments();
@@ -3516,11 +3962,14 @@
             loadBackupHistory();
         }
 
+        updateBottomNavigation();
         resetInactivityTimer();
     }
 
     function switchAuthView(v) {
         hideToast();
+        const navEl = document.getElementById('appBottomNav');
+        if (navEl) navEl.classList.add('hidden');
         document.getElementById('viewLogin').classList.add('hidden');
         document.getElementById('viewRegister').classList.add('hidden');
         document.getElementById('viewOtp').classList.add('hidden');
@@ -3564,6 +4013,8 @@
         document.getElementById('viewDashboard').classList.add('hidden');
         document.getElementById('topLogoutBtn').classList.add('hidden');
         document.getElementById('topAccountBtn').classList.add('hidden');
+        const navEl = document.getElementById('appBottomNav');
+        if (navEl) navEl.classList.add('hidden');
         document.getElementById('viewLogin').classList.remove('hidden');
         showToast(msg, "success");
     }
@@ -3571,6 +4022,9 @@
     // CHECK ACTIVE SESSION ON LOAD
     if (currentUser) {
         renderDashboard();
+    } else {
+        const navEl = document.getElementById('appBottomNav');
+        if (navEl) navEl.classList.add('hidden');
     }
 </script>
 
